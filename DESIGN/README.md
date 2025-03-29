@@ -245,3 +245,91 @@ The app uses thoughtful transitions to enhance the user experience:
 ### Accessibility Considerations
 
 The design prioritises accessibility through high contrast text options.
+
+## MVP Scope
+
+### Core MVP Components
+
+#### User Authentication & Profile
+
+- Basic email/password authentication using Firebase
+- Simple user profile displaying username and email
+- Basic profile customization (username, profile picture)
+- Account management (password reset, account deletion)
+
+#### Sound Recording Functionality
+
+- Audio recording with basic controls (start/stop)
+- Duration display during recording
+- Automatic metadata capture (location)
+- Manual title and description entry
+
+#### Sound Library Management
+
+- List view of all user recordings
+- Storage and retrieval of audio files using Firebase Storage
+
+#### Sound Playback
+
+- Standard playback controls (play/pause)
+- Progress bar with seeking capability
+- Recording information display
+- Edit/delete options for user's own recordings
+
+#### Basic UI Implementation
+
+- Clean, intuitive navigation between main screens
+- Responsive design for different device sizes
+- Consistent styling following design system
+- Essential loading and error states
+
+### Stretch Goals
+
+#### Enhanced UI Implementation
+
+- Dark mode toggle
+
+#### Sound Library Management
+
+- Basic filtering by date recorded
+- Simple search functionality by title
+- Basic categorization system (predefined categories)
+
+#### Enhanced Recording Features
+
+- Simple waveform visualization during recording
+- Advanced audio settings (quality, format)
+- Audio trimming capability
+- Background noise reduction
+
+#### Community Features
+
+- Public/private toggle for recordings
+- Following other users
+
+#### Community sound feed
+
+- Comments and likes on recordings
+- Featured recordings and collections
+
+#### Advanced Organization
+
+- Custom tags and categories
+- Advanced search with multiple parameters
+
+#### Additional Enhancements
+
+- Export and sharing capabilities
+- Offline mode with synchronization
+
+### Development Prioritisation
+
+The MVP development will follow this priority sequence:
+
+1. Core audio recording and playback functionality
+2. User authentication and data storage
+3. Basic CRUD operations for sound management
+4. Essential UI components and navigation
+5. Profile and settings functionality
+
+This approach ensures that the foundational elements of NatureChime are solid before adding more complex features. By focusing on these core components, the MVP will demonstrate all required CRUD operations while providing genuine utility to users.
