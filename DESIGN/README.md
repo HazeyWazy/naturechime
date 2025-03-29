@@ -41,6 +41,7 @@ Unlike traditional audio recording apps that focus on voice memos or music creat
 - Home screen displaying recordings
 - Navigation between home, record, library, explore, and profile screens
 - Loading/error handling
+- Dark mode
 
 ### Additional Features
 
