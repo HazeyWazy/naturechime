@@ -23,7 +23,6 @@ Unlike traditional audio recording apps that focus on voice memos or music creat
 - Edit recording details (rename, update description)
 - Delete recordings (with confirmation prompt)
 - Store/retrieve recordings from Firebase Storage
-- Favourites system for quick access to preferred sounds
 
 #### Playback
 
@@ -40,7 +39,7 @@ Unlike traditional audio recording apps that focus on voice memos or music creat
 #### Basic UI & Navigation
 
 - Home screen displaying recordings
-- Navigation between record, playback, favourites, and profile screens
+- Navigation between home, record, library, explore, and profile screens
 - Loading/error handling
 
 ### Additional Features
@@ -59,6 +58,7 @@ Unlike traditional audio recording apps that focus on voice memos or music creat
 #### User Experience
 
 - Dark mode
+- Favourites system for quick access to preferred sounds
 - Offline recording capability with later synchronisation
 
 #### Community Features
