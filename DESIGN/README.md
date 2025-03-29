@@ -177,7 +177,7 @@ NatureChime fills a unique niche between professional audio tools and casual rec
 
 ![Create Account Screen](./Wireframe/create_account.png)
 
-### Authentication Flow
+#### Authentication Flow
 
 The welcome screen introduces users to NatureChime's core functionalities. New users can create an account with email or Google login, while returning users enter through a streamlined login process. The account creation screen collects essential information while clearly communicating privacy practices.
 
@@ -195,7 +195,7 @@ From the welcome screen, users can either:
 2. Tap "Log In" if they're returning users (transitions to login screen)
 3. Tap "Explore Without Account" to browse public recordings without an account (transitions to explore screen)
 
-### Home Screen
+#### Home Screen
 
 ![Home Screen](./Wireframe/home.png)
 
@@ -215,7 +215,7 @@ The dashboard connects to all primary functions:
 2. Tap any recent recording to view detailed playback (transitions to playback screen)
 3. Use bottom navigation to access other main sections
 
-### Library Screen
+#### Library Screen
 
 ![Library Screen](./Wireframe/library.png)
 
@@ -234,3 +234,14 @@ User Flow:
 2. Tap the filter button to narrow results by tags, date, or location (transitions to filter screen)
 3. Tap 3 dots icon to delete recording or edit recording description
 4. Use bottom navigation to access other main sections
+
+### Transitions
+
+The app uses thoughtful transitions to enhance the user experience:
+
+- Smooth transitions between related screens maintain context
+- Playback controls transform naturally between states
+
+### Accessibility Considerations
+
+The design prioritises accessibility through high contrast text options.
