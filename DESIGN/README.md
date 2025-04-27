@@ -41,7 +41,6 @@ Unlike traditional audio recording apps that focus on voice memos or music creat
 - Home screen displaying recordings
 - Navigation between home, record, library, explore, and profile screens
 - Loading/error handling
-- Dark mode
 
 ### Additional Features
 
@@ -199,7 +198,7 @@ From the welcome screen, users can either:
 
 ![Home Screen](./Wireframe/home.png)
 
-The home screen features recently recorded sounds, and quick-access recording control.
+The Home screen features recently recorded sounds, and quick-access recording control.
 
 **Key Design Elements:**
 
@@ -219,21 +218,103 @@ The dashboard connects to all primary functions:
 
 ![Library Screen](./Wireframe/library.png)
 
-The library provides a list view to browse personal recordings.
+The Library screen provides a list view to browse personal recordings and a search button to look for a specific recording.
 
-**Key Design Elements**:
+**Key Design Elements:**
 
 - List view displays recordings with title, date, and location
+- Search button to find recordings
 - Number of total recordings shown at the top
 - 3 dots icon to delete and edit on the right side of each recording list
 - Bottom navigation providing access to all main sections
 
-User Flow:
+**User Flow:**
 
 1. Tap any recording to open detailed view (transitions to playback screen)
-2. Tap the filter button to narrow results by tags, date, or location (transitions to filter screen)
+2. Tap the search button to narrow results by title, date, or location
 3. Tap 3 dots icon to delete recording or edit recording description
 4. Use bottom navigation to access other main sections
+
+#### Explore Screen
+
+![Explore Screen](./Wireframe/explore.png)
+
+The Explore screen features a search bar and a list view for browsing recordings from other users, listening to them, and marking them as favorites.
+
+**Key Design Elements:**
+
+- The list view displays recordings with the title, the user who recorded them, the date, time, and location.
+- A search bar to find specific recordings
+- A button for putting recording to Favourites
+
+**User Flow:**
+
+1. Tap any recording to open detailed view (transitions to playback screen)
+2. Tap the search bar to narrow results by title, user, or location
+3. Tap the heart icon to favourite a recording
+4. Use bottom navigation to access other main sections
+
+#### Record Screen
+
+![Record Screen](./Wireframe/record.png)
+
+The Record screen focuses on essential functionality: starting, stopping, discarding and saving recordings.
+
+**Key Design Elements:**
+
+- Record button (Tap to start/stop)
+- Recording timer displays elapsed time
+- Audio level indication shows simple visual feedback for audio input levels
+- Basic metadata capture (date/time of the recording)
+- Manual title input
+- Save/discard button
+
+**User Flow:**
+
+1. Tap the mic icon to start recording or stop recording
+2. Input recording title
+3. Save button to save the recording
+4. Discard button to discard the recording
+
+#### Profile Screen
+
+![Profile Screen](./Wireframe/profile.png)
+
+The Profile screen includes a profile picture, username, edit profile button, favourite recordings, and account management options.
+
+**Key Design Elements:**
+
+- Profile displaying a profile picture, username and edit profile button
+- Last two favourite recordings with an option to view all favourite recordings
+- Account management
+
+**User Flow:**
+
+1. Tap edit profile button to edit the profile picture and username
+2. Tap on any of the favourite recording to open detailed view (transition to playback screen)
+3. Tap the heart icon to unfavourite a recording
+4. Tap Logout button to log out of the account
+5. Tap Delete Account button to delete the account
+
+#### Playback Screen
+
+![Playback Screen](./Wireframe/playback.png)
+
+The Playback Screen allows users to navigate through the recording.
+
+**Key Design Elements:**
+
+- Play/pause button in the center of the control bar
+- Seek bar that shows progress and allows users to navigate through the recording.
+- Elapsed time/total duration displays current position and total length in minutes:seconds format
+- Recording details
+
+**User Flow**:
+
+1. Play/pause controls for immediate listening
+2. Interact with seek bar to jump to specific parts
+3. Tap back button to go back to previous page
+4. Tap 3 dots icon to edit or delete a recording if the recording is owned by the user
 
 ### Transitions
 
@@ -267,6 +348,7 @@ The design prioritises accessibility through high contrast text options.
 #### Sound Library Management
 
 - List view of all user recordings
+- Simple search functionality by title
 - Storage and retrieval of audio files using Firebase Storage
 
 #### Sound Playback
@@ -292,7 +374,6 @@ The design prioritises accessibility through high contrast text options.
 #### Sound Library Management
 
 - Basic filtering by date recorded
-- Simple search functionality by title
 - Basic categorization system (predefined categories)
 
 #### Enhanced Recording Features
