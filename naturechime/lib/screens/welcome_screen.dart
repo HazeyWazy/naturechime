@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:naturechime/widgets/custom_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:naturechime/widgets/screen_wrapper.dart';
+import 'package:naturechime/utils/theme.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -9,11 +10,9 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return ScreenWrapper(
-      statusBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
       child: Scaffold(
         backgroundColor: colorScheme.surface,
         body: SafeArea(
@@ -26,12 +25,7 @@ class WelcomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // App Logo
-                    Image.asset(
-                      isDarkMode
-                          ? 'assets/images/naturechime_logo_dark.png'
-                          : 'assets/images/naturechime_logo.png',
-                      height: 80,
-                    ),
+                    Image.asset(NatureChimeAssets.logo(context), height: 80),
                     const SizedBox(height: 16),
                     // App Title
                     Text(
