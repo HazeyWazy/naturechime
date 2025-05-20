@@ -40,7 +40,9 @@ class _LoginScreenState extends State<LoginScreen> {
           if (mounted) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
+              MaterialPageRoute(
+                builder: (context) => const HomeScreen(),
+              ),
             );
           }
         }
@@ -49,6 +51,54 @@ class _LoginScreenState extends State<LoginScreen> {
           _errorMessage = e.toString();
         });
       } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _forgotPassword() async {
+    final email = emailController.text.trim();
+
+    if (validateEmail(email) != null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a valid email for password reset.'),
+          ),
+        );
+      }
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final authService = context.read<AuthService>();
+      await authService.sendPasswordResetEmail(email);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password reset email sent.'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
@@ -171,11 +221,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                       ),
-                      validator:
-                          (value) =>
-                              value != null && value.length >= 6
-                                  ? null
-                                  : 'Password too short',
+                      validator: (value) => value != null && value.length >= 6
+                          ? null
+                          : 'Password too short',
                     ),
                   ],
                 ),
@@ -197,9 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton(
-                  onPressed: () {
-                    // Reset password functionality later
-                  },
+                  onPressed: _isLoading ? null : _forgotPassword,
                   child: Text(
                     'Forgot Password?',
                     style: TextStyle(color: colorScheme.primary),
@@ -213,16 +259,15 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed:
-                      _isLoading
-                          ? null
-                          : () {
-                            setState(() {
-                              _email = emailController.text.trim();
-                              _password = passwordController.text.trim();
-                            });
-                            _login();
-                          },
+                  onPressed: _isLoading
+                      ? null
+                      : () {
+                          setState(() {
+                            _email = emailController.text.trim();
+                            _password = passwordController.text.trim();
+                          });
+                          _login();
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.primary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -230,59 +275,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Log In',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    style:
+                        TextStyle(fontSize: 16, color: colorScheme.onPrimary),
                   ),
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              // OR Divider
-              Row(
-                children: [
-                  const Expanded(child: Divider(thickness: 1)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      'OR',
-                      style: TextStyle(
-                        color: colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
-                    ),
-                  ),
-                  const Expanded(child: Divider(thickness: 1)),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Continue with Google Button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    // Google sign-in functionality later
-                  },
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: Image.asset(
-                    'assets/images/google_logo.png',
-                    height: 24,
-                  ),
-                  label: const Text(
-                    'Continue with Google',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 12),
               // Sign up prompt
               Center(
                 child: Row(
