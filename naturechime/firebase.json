@@ -1,1 +1,25 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"naturechime-comp3130","appId":"1:58487502056:android:d0396468baf18059b3055d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"naturechime-comp3130","configurations":{"android":"1:58487502056:android:d0396468baf18059b3055d","ios":"1:58487502056:ios:713be396c4db3992b3055d","macos":"1:58487502056:ios:713be396c4db3992b3055d","web":"1:58487502056:web:b8aed679ca91ce3fb3055d","windows":"1:58487502056:web:c6b4021dec966f3eb3055d"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "naturechime-comp3130",
+          "appId": "1:58487502056:android:d0396468baf18059b3055d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "naturechime-comp3130",
+          "configurations": {
+            "android": "1:58487502056:android:d0396468baf18059b3055d",
+            "ios": "1:58487502056:ios:713be396c4db3992b3055d",
+            "macos": "1:58487502056:ios:713be396c4db3992b3055d",
+            "web": "1:58487502056:web:b8aed679ca91ce3fb3055d",
+            "windows": "1:58487502056:web:c6b4021dec966f3eb3055d"
+          }
+        }
+      }
+    }
+  }
+}

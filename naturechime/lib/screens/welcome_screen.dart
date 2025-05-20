@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:naturechime/screens/login_screen.dart';
 import 'package:naturechime/widgets/custom_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:naturechime/widgets/screen_wrapper.dart';
@@ -101,7 +102,14 @@ class WelcomeScreen extends StatelessWidget {
                     CustomButton(
                       text: 'Log In',
                       isPrimary: false,
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 24),
                     // Explore Without Account Text

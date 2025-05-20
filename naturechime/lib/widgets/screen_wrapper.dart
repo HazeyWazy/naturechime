@@ -3,28 +3,28 @@ import 'package:flutter/services.dart';
 
 class ScreenWrapper extends StatelessWidget {
   final Widget child;
-  final bool autoStatusBarBrightness;
+  final Brightness? statusBarIconBrightness;
 
   const ScreenWrapper({
     super.key,
     required this.child,
-    this.autoStatusBarBrightness = true,
+    this.statusBarIconBrightness,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    final statusBarBrightness =
-        autoStatusBarBrightness
-            ? (isDarkMode ? Brightness.light : Brightness.dark)
-            : Brightness.dark;
+    final themeBrightness = Theme.of(context).brightness;
+    final effectiveBrightness =
+        statusBarIconBrightness ??
+        (themeBrightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: statusBarBrightness,
-        statusBarBrightness: statusBarBrightness,
+        statusBarIconBrightness: effectiveBrightness,
+        statusBarBrightness: effectiveBrightness,
       ),
       child: child,
     );
