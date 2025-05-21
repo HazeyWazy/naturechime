@@ -1,6 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:naturechime/screens/create_account_screen.dart';
 import 'package:naturechime/utils/theme.dart';
 import 'package:naturechime/widgets/custom_button.dart';
+import 'package:naturechime/widgets/google_sign_in_button.dart';
+import 'package:naturechime/widgets/screen_wrapper.dart';
 import 'package:provider/provider.dart';
 import 'package:naturechime/services/auth_service.dart';
 import 'package:naturechime/utils/validators.dart';
@@ -39,9 +43,9 @@ class _LoginScreenState extends State<LoginScreen> {
         );
         if (user != null) {
           if (mounted) {
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
-              MaterialPageRoute(
+              CupertinoPageRoute(
                 builder: (context) => const HomeScreen(),
               ),
             );
@@ -107,48 +111,18 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _signInWithGoogle() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final authService = context.read<AuthService>();
-      final user = await authService.signInWithGoogle();
-      if (user != null && mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Google sign-in failed: ${e.toString()}')),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 500),
-            child: SingleChildScrollView(
-              child: Padding(
+    return ScreenWrapper(
+      child: Scaffold(
+        backgroundColor: colorScheme.surface,
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 500),
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24.0,
                   vertical: 16.0,
@@ -158,6 +132,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     // Back button
                     IconButton(
+                      style: IconButton.styleFrom(
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                       icon: Icon(
                         Icons.arrow_back,
                         color: colorScheme.onSurface,
@@ -173,8 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Center(
                       child: Column(
                         children: [
-                          Image.asset(NatureChimeAssets.logo(context),
-                              height: 80),
+                          Image.asset(NatureChimeAssets.logo(context), height: 80),
                           const SizedBox(height: 12),
                           Text(
                             'Welcome Back',
@@ -189,8 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             'Sign in to continue your sound journey',
                             style: TextStyle(
                               fontSize: 16,
-                              color:
-                                  colorScheme.onSurface.withValues(alpha: 0.7),
+                              color: colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -256,9 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
+                                  obscurePassword ? Icons.visibility_off : Icons.visibility,
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -271,9 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: colorScheme.onSurface,
                             ),
                             validator: (value) =>
-                                value != null && value.length >= 6
-                                    ? null
-                                    : 'Password too short',
+                                value != null && value.length >= 6 ? null : 'Password too short',
                           ),
                         ],
                       ),
@@ -289,8 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(color: colorScheme.error),
                         ),
                       ),
-                    if (_isLoading)
-                      const Center(child: CircularProgressIndicator()),
+                    if (_isLoading) const Center(child: CircularProgressIndicator()),
 
                     // Forgot Password
                     Align(
@@ -325,7 +295,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     // OR Divider
                     Row(
                       children: [
-                        const Expanded(child: Divider(thickness: 1)),
+                        const Expanded(
+                          child: Divider(thickness: 1),
+                        ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
@@ -343,37 +315,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 20),
 
-                    // Continue with Google Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _signInWithGoogle,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.surface,
-                          foregroundColor: colorScheme.primary,
-                          side:
-                              BorderSide(color: colorScheme.primary, width: 2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/images/google_logo.png',
-                              height: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'Continue with Google',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    const GoogleSignInButton(),
 
                     const SizedBox(height: 12),
 
@@ -388,7 +330,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                              // Navigate to Sign Up screen later
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) => const CreateAccountScreen(),
+                                ),
+                              );
                             },
                             child: Text(
                               'Sign up',
