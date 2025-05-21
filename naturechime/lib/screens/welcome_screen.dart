@@ -53,15 +53,13 @@ class WelcomeScreen extends StatelessWidget {
                     // Responsive Feature Grid
                     LayoutBuilder(
                       builder: (context, constraints) {
-                        final crossAxisCount =
-                            constraints.maxWidth > 320 ? 2 : 1;
+                        final crossAxisCount = constraints.maxWidth > 320 ? 2 : 1;
 
                         return GridView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: 4,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: crossAxisCount,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
