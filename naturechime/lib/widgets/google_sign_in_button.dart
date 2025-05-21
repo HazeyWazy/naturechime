@@ -42,8 +42,8 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Google sign-in failed.'),
+          SnackBar(
+            content: Text('Google sign-in failed: $e'),
           ),
         );
       }
