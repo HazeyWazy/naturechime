@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:naturechime/screens/create_account_screen.dart';
 import 'package:naturechime/screens/login_screen.dart';
 import 'package:naturechime/widgets/custom_button.dart';
 import 'package:flutter/cupertino.dart';
@@ -97,7 +98,17 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
                     // Buttons
-                    CustomButton(text: 'Create Account', onPressed: () {}),
+                    CustomButton(
+                      text: 'Create Account',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (context) => const CreateAccountScreen(),
+                          ),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 16),
                     CustomButton(
                       text: 'Log In',
@@ -105,7 +116,7 @@ class WelcomeScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          CupertinoPageRoute(
                             builder: (context) => const LoginScreen(),
                           ),
                         );
