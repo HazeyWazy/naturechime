@@ -4,6 +4,15 @@ import 'package:naturechime/screens/login_screen.dart';
 import 'package:naturechime/widgets/custom_button.dart';
 import 'package:naturechime/widgets/google_sign_in_button.dart';
 import 'package:naturechime/widgets/screen_wrapper.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:naturechime/services/auth_service.dart';
+import 'package:naturechime/utils/validators.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+File? _profileImageFile;
+final AuthService _authService = AuthService();
+final ImagePicker _picker = ImagePicker();
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -21,6 +30,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -74,18 +85,33 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           CircleAvatar(
                             radius: 50,
                             backgroundColor: colorScheme.surfaceContainerHighest,
-                            child: Icon(
-                              Icons.person,
-                              size: 65,
-                              color: colorScheme.onSurface.withValues(alpha: 0.3),
-                            ),
+                            child: _profileImageFile == null
+                                ? Icon(
+                                    Icons.person,
+                                    size: 65,
+                                    color: colorScheme.onSurface.withAlpha(75),
+                                  )
+                                : ClipOval(
+                                    child: Image.file(
+                                      _profileImageFile!,
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
                           ),
                           const SizedBox(height: 8),
 
                           // Upload Profile Picture Button
                           TextButton.icon(
-                            onPressed: () {
-                              // Upload profile picture logic here
+                            onPressed: () async {
+                              final pickedFile =
+                                  await _picker.pickImage(source: ImageSource.gallery);
+                              if (pickedFile != null) {
+                                setState(() {
+                                  _profileImageFile = File(pickedFile.path);
+                                });
+                              }
                             },
                             icon: Icon(
                               Icons.file_upload_outlined,
@@ -111,31 +137,46 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
                     const SizedBox(height: 24),
 
-                    // Username Field
-                    Text(
-                      'Username',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _usernameController,
-                      decoration: const InputDecoration(
-                        hintText: 'Choose a username',
-                        border: OutlineInputBorder(),
-                      ),
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'This will be visible to other users.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.onSurface.withValues(alpha: 0.75),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Username Field
+                          Text(
+                            'Username',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            controller: _usernameController,
+                            decoration: InputDecoration(
+                              hintText: 'Choose a username',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                            ),
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
+                            ),
+                            validator: (value) => validateNonEmpty(value, 'Username'),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'This will be visible to other users.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: colorScheme.onSurface.withValues(alpha: 0.75),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
 
@@ -150,16 +191,23 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    TextField(
+                    TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'example@gmail.com',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                       ),
                       style: TextStyle(
                         color: colorScheme.onSurface,
                       ),
+                      validator: (value) => validateEmail(value),
                     ),
 
                     const SizedBox(height: 20),
@@ -173,12 +221,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    TextField(
+                    TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         hintText: 'Create a password',
-                        border: const OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -193,6 +247,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       style: TextStyle(
                         color: colorScheme.onSurface,
                       ),
+                      validator: (value) => validatePassword(value),
                     ),
 
                     const SizedBox(height: 20),
@@ -206,12 +261,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    TextField(
+                    TextFormField(
                       controller: _confirmPasswordController,
                       obscureText: _obscureConfirmPassword,
                       decoration: InputDecoration(
                         hintText: 'Confirm your password',
-                        border: const OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
@@ -226,6 +287,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       style: TextStyle(
                         color: colorScheme.onSurface,
                       ),
+                      validator: (value) =>
+                          validateConfirmPassword(value, _passwordController.text),
                     ),
 
                     const SizedBox(height: 20),
@@ -260,8 +323,71 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     // Create Account Button
                     CustomButton(
                       text: 'Create Account',
-                      onPressed: () {
-                        // Account creation logic here
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          final username = _usernameController.text.trim();
+                          final email = _emailController.text.trim();
+                          final password = _passwordController.text;
+
+                          if (!_agreedToTerms) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('You must agree to the terms.'),
+                              ),
+                            );
+                            return;
+                          }
+
+                          try {
+                            final isTaken = await _authService.isDisplayNameTaken(username);
+
+                            if (isTaken && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Username is already taken.'),
+                                ),
+                              );
+                              return;
+                            }
+
+                            final User? firebaseUser =
+                                await _authService.createUserWithEmailAndPassword(
+                              email,
+                              password,
+                              username,
+                              _profileImageFile,
+                            );
+
+                            if (firebaseUser != null && context.mounted) {
+                              Navigator.pushReplacement(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) => const LoginScreen(),
+                                  settings: const RouteSettings(
+                                    arguments: {'showSuccessPopup': true},
+                                  ),
+                                ),
+                              );
+                            } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Account creation completed, but no user data returned.'),
+                                  ),
+                                );
+                              }
+                            }
+                          } catch (error) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Failed to create account: ${error.toString()}'),
+                                ),
+                              );
+                            }
+                          }
+                        }
                       },
                     ),
 

@@ -28,3 +28,14 @@ String? validateNonEmpty(String? value, String fieldName) {
   }
   return null;
 }
+
+// Validates that the confirm password matches the original password
+String? validateConfirmPassword(String? confirmPassword, String? originalPassword) {
+  if (confirmPassword == null || confirmPassword.isEmpty) {
+    return 'Confirm password cannot be empty';
+  }
+  if (confirmPassword != originalPassword) {
+    return 'Passwords do not match';
+  }
+  return null;
+}

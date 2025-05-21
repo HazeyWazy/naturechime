@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:naturechime/services/auth_service.dart';
 import 'package:naturechime/utils/validators.dart';
 import 'package:naturechime/screens/home_screen.dart';
+import 'package:another_flushbar/flushbar.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,6 +28,30 @@ class _LoginScreenState extends State<LoginScreen> {
   String _password = '';
   bool _isLoading = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (args != null && args['showSuccessPopup'] == true) {
+        Flushbar(
+          title: 'Success',
+          message: 'User account successfully created.',
+          duration: const Duration(seconds: 5),
+          flushbarPosition: FlushbarPosition.TOP,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          icon: Icon(
+            Icons.check_circle_outline,
+            size: 28.0,
+            color: Theme.of(context).colorScheme.onPrimary,
+          ),
+          isDismissible: true,
+          dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+        ).show(context);
+      }
+    });
+  }
 
   void _login() async {
     if (_formKey.currentState!.validate()) {
