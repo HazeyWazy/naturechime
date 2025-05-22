@@ -99,7 +99,7 @@ void main() {
 
       await tester.tap(signUpButtonFinder);
       await tester.pump(); // Process the tap
-      await tester.pump(const Duration(milliseconds: 300)); // Allow time for initial frame of new screen
+      await tester.pump(const Duration(milliseconds: 300)); // Wait for new screen
       await tester.pumpAndSettle(); // Then settle fully
 
       expect(find.byType(CreateAccountScreen), findsOneWidget);
