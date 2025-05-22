@@ -5,7 +5,7 @@ import 'package:naturechime/screens/main_screen.dart';
 
 void main() {
   testWidgets('NatureChimeApp builds correctly', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+    // Build the app and trigger a frame.
     await tester.pumpWidget(const NatureChimeApp());
 
     // Verify that the MainScreen is present.

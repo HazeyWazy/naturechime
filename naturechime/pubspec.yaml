@@ -42,6 +42,8 @@ dependencies:
   image_picker: ^1.1.2
   cloudinary_public: ^0.23.1
   another_flushbar: ^1.12.30
+  mockito: ^5.4.6
+  build_runner: ^2.4.15
 
 dev_dependencies:
   flutter_test:

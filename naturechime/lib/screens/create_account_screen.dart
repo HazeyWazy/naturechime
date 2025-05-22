@@ -9,9 +9,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:naturechime/services/auth_service.dart';
 import 'package:naturechime/utils/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 File? _profileImageFile;
-final AuthService _authService = AuthService();
 final ImagePicker _picker = ImagePicker();
 
 class CreateAccountScreen extends StatefulWidget {
@@ -339,7 +339,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           }
 
                           try {
-                            final isTaken = await _authService.isDisplayNameTaken(username);
+                            final authService = context.read<AuthService>();
+
+                            final isTaken = await authService.isDisplayNameTaken(username);
 
                             if (isTaken && context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -351,7 +353,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             }
 
                             final User? firebaseUser =
-                                await _authService.createUserWithEmailAndPassword(
+                                await authService.createUserWithEmailAndPassword(
                               email,
                               password,
                               username,
