@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:naturechime/screens/create_account_screen.dart';
 import 'package:naturechime/screens/login_screen.dart';
+import 'package:naturechime/screens/main_screen.dart';
 import 'package:naturechime/widgets/custom_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:naturechime/widgets/screen_wrapper.dart';
-import 'package:naturechime/utils/theme.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -25,9 +25,9 @@ class WelcomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
+                  // App Logo
                   children: [
-                    // App Logo
-                    Image.asset(NatureChimeAssets.logo(context), height: 80),
+                    Image.asset('assets/images/naturechime_logo.png', height: 80),
                     const SizedBox(height: 16),
                     // App Title
                     Text(
@@ -123,7 +123,14 @@ class WelcomeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     // Explore Without Account Text
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (context) => const MainScreen(),
+                          ),
+                        );
+                      },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

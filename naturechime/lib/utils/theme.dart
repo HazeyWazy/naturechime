@@ -19,13 +19,3 @@ final ThemeData natureChimeLightTheme = ThemeData().copyWith(
 final ThemeData natureChimeDarkTheme = ThemeData().copyWith(
   colorScheme: darkColorScheme,
 );
-
-// Centralised asset management
-class NatureChimeAssets {
-  static String logo(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    return isDarkMode
-        ? 'assets/images/naturechime_logo_dark.png'
-        : 'assets/images/naturechime_logo.png';
-  }
-}

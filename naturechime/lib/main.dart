@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:naturechime/screens/welcome_screen.dart';
+import 'package:naturechime/screens/main_screen.dart';
 import 'package:naturechime/services/auth_service.dart';
 import 'package:naturechime/utils/theme.dart';
 import 'package:provider/provider.dart';
@@ -33,7 +33,7 @@ class NatureChimeApp extends StatelessWidget {
       title: 'NatureChime',
       theme: natureChimeLightTheme,
       darkTheme: natureChimeDarkTheme,
-      home: const WelcomeScreen(),
+      home: const MainScreen(),
     );
   }
 }

@@ -1,14 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:naturechime/screens/create_account_screen.dart';
-import 'package:naturechime/utils/theme.dart';
+import 'package:naturechime/screens/main_screen.dart';
 import 'package:naturechime/widgets/custom_button.dart';
 import 'package:naturechime/widgets/google_sign_in_button.dart';
 import 'package:naturechime/widgets/screen_wrapper.dart';
 import 'package:provider/provider.dart';
 import 'package:naturechime/services/auth_service.dart';
 import 'package:naturechime/utils/validators.dart';
-import 'package:naturechime/screens/home_screen.dart';
 import 'package:another_flushbar/flushbar.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -71,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Navigator.push(
               context,
               CupertinoPageRoute(
-                builder: (context) => const HomeScreen(),
+                builder: (context) => const MainScreen(),
               ),
             );
           }
@@ -175,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Center(
                       child: Column(
                         children: [
-                          Image.asset(NatureChimeAssets.logo(context), height: 80),
+                          Image.asset('assets/images/naturechime_logo.png', height: 80),
                           const SizedBox(height: 12),
                           Text(
                             'Welcome Back',
