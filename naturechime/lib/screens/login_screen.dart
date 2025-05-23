@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:naturechime/services/auth_service.dart';
 import 'package:naturechime/utils/validators.dart';
 import 'package:another_flushbar/flushbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -110,21 +111,37 @@ class _LoginScreenState extends State<LoginScreen> {
       final authService = context.read<AuthService>();
       await authService.sendPasswordResetEmail(email);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Password reset email sent.'),
+        Flushbar(
+          title: 'Success',
+          message: 'Password reset email sent.',
+          duration: const Duration(seconds: 5),
+          flushbarPosition: FlushbarPosition.TOP,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          icon: Icon(
+            Icons.check_circle_outline,
+            size: 28.0,
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
-        );
+        ).show(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
+        String errorMessage = e.toString();
+        if (e is FirebaseAuthException) {
+          errorMessage = 'Error (${e.code}): ${e.message}';
+        }
+        Flushbar(
+          title: 'Error',
+          message: errorMessage,
+          duration: const Duration(seconds: 5),
+          flushbarPosition: FlushbarPosition.TOP,
+          backgroundColor: Theme.of(context).colorScheme.error,
+          icon: Icon(
+            Icons.error_outline,
+            size: 28.0,
+            color: Theme.of(context).colorScheme.onError,
           ),
-        );
+        ).show(context);
       }
     } finally {
       if (mounted) {

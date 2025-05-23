@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 
-class AuthService {
+class AuthService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -79,8 +80,8 @@ class AuthService {
       return result.user;
     } on FirebaseAuthException catch (e) {
       throw Exception('Firebase Auth error: ${e.message}');
-    } on PlatformException catch (e) {
-      throw Exception('Google Sign-In platform error: ${e.message}');
+    } on PlatformException {
+      throw Exception('Google Sign-In platform error.');
     } catch (e) {
       throw Exception('An unexpected error occurred during Google Sign-In.');
     }
