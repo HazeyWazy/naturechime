@@ -10,8 +10,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloudinary_public/cloudinary_public.dart'; // Added Cloudinary
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import dotenv
+import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class RecordScreen extends StatefulWidget {
   const RecordScreen({super.key});
