@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:naturechime/models/user_model.dart';
 
 class AuthService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -23,7 +24,8 @@ class AuthService extends ChangeNotifier {
 
     debugPrint("AuthService constructor: CLOUDINARY_CLOUD_NAME from .env = '$cloudNameFromEnv'");
     debugPrint(
-        "AuthService constructor: CLOUDINARY_PROFILE_UPLOAD_PRESET from .env = '$profileUploadPresetFromEnv'");
+      "AuthService constructor: CLOUDINARY_PROFILE_UPLOAD_PRESET from .env = '$profileUploadPresetFromEnv'",
+    );
 
     if (cloudNameFromEnv != null &&
         cloudNameFromEnv.isNotEmpty &&
@@ -33,9 +35,13 @@ class AuthService extends ChangeNotifier {
       _cloudinaryUnsignedUploadPreset = profileUploadPresetFromEnv;
       try {
         debugPrint(
-            "AuthService constructor: Attempting to initialize CloudinaryPublic with CloudName: '$_cloudinaryCloudName', Preset: '$_cloudinaryUnsignedUploadPreset'");
-        _cloudinary =
-            CloudinaryPublic(_cloudinaryCloudName!, _cloudinaryUnsignedUploadPreset!, cache: false);
+          "AuthService constructor: Attempting to initialize CloudinaryPublic with CloudName: '$_cloudinaryCloudName', Preset: '$_cloudinaryUnsignedUploadPreset'",
+        );
+        _cloudinary = CloudinaryPublic(
+          _cloudinaryCloudName!,
+          _cloudinaryUnsignedUploadPreset!,
+          cache: false,
+        );
         debugPrint("AuthService constructor: Cloudinary client initialized successfully.");
       } catch (e) {
         _cloudinary = null; // Ensure it's null if constructor fails
@@ -160,13 +166,17 @@ class AuthService extends ChangeNotifier {
           }
         }
 
-        await _firestore.collection('users').doc(user.uid).set({
-          'uid': user.uid,
-          'email': email,
-          'displayName': displayName,
-          'profileImageUrl': profileImageUrl,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+        // Create a UserModel instance
+        final newUser = UserModel(
+          uid: user.uid,
+          email: email,
+          displayName: displayName,
+          profileImageUrl: profileImageUrl,
+          createdAt: Timestamp.now(),
+        );
+
+        // Use the toFirestore method to convert the UserModel to a Map
+        await _firestore.collection('users').doc(user.uid).set(newUser.toFirestore());
       }
 
       return user;
