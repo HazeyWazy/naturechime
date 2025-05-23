@@ -37,9 +37,12 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        leading: Image.asset('assets/images/naturechime_logo.png', height: 80),
+        leading: Image.asset('assets/images/naturechime_logo.png'),
         title: const Text('NatureChime'),
-        foregroundColor: colorScheme.onSurface,
+        titleSpacing: 0.0,
+        toolbarHeight: kToolbarHeight + 15,
+        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: colorScheme.primary,
       ),
       body: SafeArea(
         child: Center(
@@ -70,8 +73,9 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: colorScheme.primary,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: colorScheme.onPrimary,
+        unselectedItemColor: colorScheme.inversePrimary,
+        backgroundColor: colorScheme.primary,
         showUnselectedLabels: true,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
