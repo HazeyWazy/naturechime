@@ -14,7 +14,6 @@ void main() async {
   try {
     await dotenv.load(fileName: ".env");
     debugPrint(".env file loaded successfully.");
-    // Let's try to print one of the expected values to see if it's there
     debugPrint(
         "Attempting to read CLOUDINARY_CLOUD_NAME from main: ${dotenv.env['CLOUDINARY_CLOUD_NAME']}");
   } catch (e) {
