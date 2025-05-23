@@ -45,6 +45,10 @@ dependencies:
   mockito: ^5.4.6
   build_runner: ^2.4.15
   intl: ^0.20.2
+  record: ^6.0.0
+  permission_handler: ^12.0.0+1
+  path_provider: ^2.1.5
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +75,7 @@ flutter:
   assets:
     - assets/images/naturechime_logo.png
     - assets/images/google_logo.png
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
