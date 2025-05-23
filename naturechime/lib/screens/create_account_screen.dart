@@ -11,7 +11,6 @@ import 'package:naturechime/utils/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
-File? _profileImageFile;
 final ImagePicker _picker = ImagePicker();
 
 class CreateAccountScreen extends StatefulWidget {
@@ -22,6 +21,7 @@ class CreateAccountScreen extends StatefulWidget {
 }
 
 class _CreateAccountScreenState extends State<CreateAccountScreen> {
+  File? _profileImageFile;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreedToTerms = false;
@@ -152,6 +152,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           ),
                           const SizedBox(height: 6),
                           TextFormField(
+                            key: const Key('usernameField'),
                             controller: _usernameController,
                             decoration: InputDecoration(
                               hintText: 'Choose a username',
@@ -176,146 +177,149 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                               color: colorScheme.onSurface.withValues(alpha: 0.75),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
 
-                    const SizedBox(height: 20),
+                          const SizedBox(height: 20),
 
-                    // Email Field
-                    Text(
-                      'Email',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        hintText: 'example@gmail.com',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                      ),
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                      ),
-                      validator: (value) => validateEmail(value),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Password Field
-                    Text(
-                      'Password',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        hintText: 'Create a password',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                      ),
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                      ),
-                      validator: (value) => validatePassword(value),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Confirm Password Field
-                    Text(
-                      'Confirm Password',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextFormField(
-                      controller: _confirmPasswordController,
-                      obscureText: _obscureConfirmPassword,
-                      decoration: InputDecoration(
-                        hintText: 'Confirm your password',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureConfirmPassword = !_obscureConfirmPassword;
-                            });
-                          },
-                        ),
-                      ),
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                      ),
-                      validator: (value) =>
-                          validateConfirmPassword(value, _passwordController.text),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Terms Checkbox
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Checkbox(
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          value: _agreedToTerms,
-                          onChanged: (value) {
-                            setState(() {
-                              _agreedToTerms = value!;
-                            });
-                          },
-                        ),
-                        Expanded(
-                          child: Text(
-                            'I agree to the Terms of Service & Privacy Policy.',
+                          // Email Field
+                          Text(
+                            'Email',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 16,
                               color: colorScheme.onSurface,
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            key: const Key('emailField'),
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              hintText: 'example@gmail.com',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                            ),
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
+                            ),
+                            validator: (value) => validateEmail(value),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Password Field
+                          Text(
+                            'Password',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            key: const Key('passwordField'),
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
+                              hintText: 'Create a password',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                              ),
+                            ),
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
+                            ),
+                            validator: (value) => validatePassword(value),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Confirm Password Field
+                          Text(
+                            'Confirm Password',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            key: const Key('confirmPasswordField'),
+                            controller: _confirmPasswordController,
+                            obscureText: _obscureConfirmPassword,
+                            decoration: InputDecoration(
+                              hintText: 'Confirm your password',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscureConfirmPassword = !_obscureConfirmPassword;
+                                  });
+                                },
+                              ),
+                            ),
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
+                            ),
+                            validator: (value) =>
+                                validateConfirmPassword(value, _passwordController.text),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Terms Checkbox
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Checkbox(
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                value: _agreedToTerms,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _agreedToTerms = value!;
+                                  });
+                                },
+                              ),
+                              Expanded(
+                                child: Text(
+                                  'I agree to the Terms of Service & Privacy Policy.',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
 
                     const SizedBox(height: 20),
@@ -324,70 +328,74 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     CustomButton(
                       text: 'Create Account',
                       onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          final username = _usernameController.text.trim();
-                          final email = _emailController.text.trim();
-                          final password = _passwordController.text;
+                        // First validate the form fields and return early if validation fails
+                        if (!_formKey.currentState!.validate()) {
+                          return; // Exit early - validation errors will be displayed
+                        }
 
-                          if (!_agreedToTerms) {
+                        // Only if form validation passes, proceed to check terms agreement
+                        if (!_agreedToTerms) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('You must agree to the terms.'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        final username = _usernameController.text.trim();
+                        final email = _emailController.text.trim();
+                        final password = _passwordController.text;
+
+                        try {
+                          final authService = context.read<AuthService>();
+
+                          final isTaken = await authService.isDisplayNameTaken(username);
+
+                          if (isTaken && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('You must agree to the terms.'),
+                                content: Text('Username is already taken.'),
                               ),
                             );
                             return;
                           }
 
-                          try {
-                            final authService = context.read<AuthService>();
+                          final User? firebaseUser =
+                              await authService.createUserWithEmailAndPassword(
+                            email,
+                            password,
+                            username,
+                            _profileImageFile,
+                          );
 
-                            final isTaken = await authService.isDisplayNameTaken(username);
-
-                            if (isTaken && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Username is already taken.'),
+                          if (firebaseUser != null && context.mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) => const LoginScreen(),
+                                settings: const RouteSettings(
+                                  arguments: {'showSuccessPopup': true},
                                 ),
-                              );
-                              return;
-                            }
-
-                            final User? firebaseUser =
-                                await authService.createUserWithEmailAndPassword(
-                              email,
-                              password,
-                              username,
-                              _profileImageFile,
+                              ),
                             );
-
-                            if (firebaseUser != null && context.mounted) {
-                              Navigator.pushReplacement(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => const LoginScreen(),
-                                  settings: const RouteSettings(
-                                    arguments: {'showSuccessPopup': true},
-                                  ),
-                                ),
-                              );
-                            } else {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Account creation completed, but no user data returned.'),
-                                  ),
-                                );
-                              }
-                            }
-                          } catch (error) {
+                          } else {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Failed to create account: ${error.toString()}'),
+                                const SnackBar(
+                                  content: Text(
+                                      'Account creation completed, but no user data returned.'),
                                 ),
                               );
                             }
+                          }
+                        } catch (error) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to create account: ${error.toString()}'),
+                              ),
+                            );
                           }
                         }
                       },
