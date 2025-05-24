@@ -98,14 +98,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+      padding: const EdgeInsets.fromLTRB(16.0, 18.0, 16.0, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Explore Sounds',
-            style: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: textTheme.headlineSmall?.copyWith(
               color: colorScheme.onSurface,
             ),
           ),
@@ -114,7 +113,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
             controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Search by title or location',
-              prefixIcon: Icon(CupertinoIcons.search, color: colorScheme.onSurfaceVariant),
+              prefixIcon: Icon(
+                CupertinoIcons.search,
+                color: colorScheme.onSurfaceVariant,
+              ),
               filled: true,
               fillColor: colorScheme.surfaceContainerHighest,
               border: OutlineInputBorder(
