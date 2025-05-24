@@ -72,6 +72,36 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  // Update user profile picture
+  Future<void> updateUserProfilePicture(
+    String userId,
+    File newImageFile,
+    String? oldImageUrl,
+  ) async {
+    try {
+      // Upload the new image
+      String? newImageUrl = await _uploadImageToCloudinary(newImageFile);
+      if (newImageUrl == null) {
+        throw Exception("Failed to upload new profile image, URL was null.");
+      }
+
+      // Update Firestore with the new image URL
+      await _firestore.collection('users').doc(userId).update({
+        'profileImageUrl': newImageUrl,
+      });
+
+      // Notify listeners if you want UI to react immediately to this change
+      // For example, if ProfileScreen is listening directly to UserModel changes from a stream.
+      // However, since ProfileScreen fetches UserModel on init, this might not be needed
+      // if the user is expected to refresh or if the screen re-fetches data.
+      // For now, we are not calling notifyListeners() here as UserModel isn't directly managed by AuthService state.
+      // notifyListeners(); // Consider if UserModel state should be propagated.
+    } catch (e) {
+      debugPrint("Error updating profile picture: $e");
+      throw Exception("Failed to update profile picture: ${e.toString()}");
+    }
+  }
+
   // Sign in with email & password
   Future<User?> signInWithEmailAndPassword(String email, String password) async {
     try {
