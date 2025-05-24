@@ -3,11 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:naturechime/screens/playback_screen.dart';
 
+const String currentUserId = 'user123';
+
 class RecordingListItem extends StatelessWidget {
   final String title;
   final DateTime dateTime;
   final int durationSeconds;
   final String? location;
+  final String username;
+  final String? notes;
+  final String userId;
 
   const RecordingListItem({
     super.key,
@@ -15,6 +20,9 @@ class RecordingListItem extends StatelessWidget {
     required this.dateTime,
     required this.durationSeconds,
     this.location,
+    required this.username,
+    this.notes,
+    required this.userId,
   });
 
   String _formatDuration(int totalSeconds) {
@@ -23,6 +31,23 @@ class RecordingListItem extends StatelessWidget {
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
     return "$minutes:$seconds"; // Format as MM:SS
+  }
+
+  void _navigateToPlayback(BuildContext context) {
+    Navigator.push(
+      context,
+      CupertinoModalPopupRoute(
+        builder: (context) => PlaybackScreen(
+          initialTitle: title,
+          initialDateTime: dateTime,
+          initialLocation: location,
+          initialUsername: username,
+          initialNotes: notes,
+          initialDurationSeconds: durationSeconds,
+          isCurrentUserRecording: userId == currentUserId,
+        ),
+      ),
+    );
   }
 
   @override
@@ -105,23 +130,9 @@ class RecordingListItem extends StatelessWidget {
             color: colorScheme.primary,
             size: 30,
           ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              CupertinoModalPopupRoute(
-                builder: (context) => const PlaybackScreen(),
-              ),
-            );
-          },
+          onPressed: () => _navigateToPlayback(context),
         ),
-        onTap: () {
-          Navigator.push(
-            context,
-            CupertinoModalPopupRoute(
-              builder: (context) => const PlaybackScreen(),
-            ),
-          );
-        },
+        onTap: () => _navigateToPlayback(context),
       ),
     );
   }
