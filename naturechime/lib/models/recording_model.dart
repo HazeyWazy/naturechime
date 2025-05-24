@@ -7,6 +7,9 @@ class Recording {
   final String audioUrl; // URL of the audio file
   final Timestamp createdAt; // Timestamp of when the recording was created
   final int durationSeconds; // Duration of the recording in seconds
+  final String? location;
+  final String? username;
+  final String? notes;
 
   Recording({
     required this.id,
@@ -15,6 +18,9 @@ class Recording {
     required this.audioUrl,
     required this.createdAt,
     required this.durationSeconds,
+    this.location, // Added
+    this.username, // Added
+    this.notes, // Added
   });
 
   // Factory constructor to create a Recording
@@ -27,6 +33,9 @@ class Recording {
       audioUrl: snapshot['audioUrl'] ?? '',
       createdAt: snapshot['createdAt'] ?? Timestamp.now(),
       durationSeconds: snapshot['durationSeconds'] ?? 0,
+      location: snapshot['location'] as String?,
+      username: snapshot['username'] as String?,
+      notes: snapshot['notes'] as String?,
     );
   }
 
@@ -37,6 +46,9 @@ class Recording {
         'audioUrl': audioUrl,
         'createdAt': createdAt,
         'durationSeconds': durationSeconds,
+        'location': location,
+        'username': username,
+        'notes': notes,
       };
 
   Recording copyWith({
@@ -46,6 +58,9 @@ class Recording {
     String? audioUrl,
     Timestamp? createdAt,
     int? durationSeconds,
+    String? location,
+    String? username,
+    String? notes,
   }) {
     return Recording(
       id: id ?? this.id,
@@ -54,6 +69,9 @@ class Recording {
       audioUrl: audioUrl ?? this.audioUrl,
       createdAt: createdAt ?? this.createdAt,
       durationSeconds: durationSeconds ?? this.durationSeconds,
+      location: location ?? this.location,
+      username: username ?? this.username,
+      notes: notes ?? this.notes,
     );
   }
 }
