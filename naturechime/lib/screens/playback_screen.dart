@@ -10,6 +10,7 @@ class PlaybackScreen extends StatefulWidget {
   final String initialUsername;
   final String? initialNotes;
   final int initialDurationSeconds;
+  final bool isCurrentUserRecording; // Added to control edit button visibility
 
   const PlaybackScreen({
     super.key,
@@ -20,6 +21,7 @@ class PlaybackScreen extends StatefulWidget {
     this.initialNotes =
         'A beautiful morning in the rainforest, birds chirping and leaves rustling. Captured the essence perfectly.',
     this.initialDurationSeconds = 300, // 5 minutes
+    this.isCurrentUserRecording = false, // Default to false
   });
 
   @override
@@ -73,8 +75,6 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
     setState(() {
       _isPlaying = !_isPlaying;
       if (_isPlaying) {
-        // Simulate playback - in a real app, start audio player
-        // For now, let's just advance the slider a bit if we press play and it's at 0
         if (_currentSliderValue == 0) {
           _currentSliderValue = 0.1;
           _currentPosition =
@@ -82,7 +82,6 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
         }
         debugPrint('Playing...');
       } else {
-        // Simulate pause - in a real app, pause audio player
         debugPrint('Paused...');
       }
     });
@@ -107,56 +106,61 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
         backgroundColor: colorScheme.primary,
         toolbarHeight: kToolbarHeight + 15,
         actions: [
-          IconButton(
-            icon: Icon(
-              CupertinoIcons.create,
-              color: colorScheme.onPrimary,
+          if (widget.isCurrentUserRecording) // Conditionally show edit button
+            IconButton(
+              icon: Icon(
+                CupertinoIcons.create,
+                color: colorScheme.onPrimary,
+              ),
+              onPressed: _onEdit,
+              tooltip: 'Edit Recording',
             ),
-            onPressed: _onEdit,
-            tooltip: 'Edit Recording',
-          ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      _title,
-                      style: textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Recorded on $formattedDateTime',
-                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'By $_username${_location != null && _location!.isNotEmpty ? " at $_location" : ""}',
-                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-                    ),
-                    if (_notes != null && _notes!.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
-                        child: Text(
-                          _notes!,
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: colorScheme.onSurface,
-                            height: 1.5,
-                          ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        _title,
+                        style: textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
                         ),
-                      )
-                    else
-                      const SizedBox(height: 24), // Maintain some space if no notes
-                  ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Recorded on $formattedDateTime',
+                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'By $_username${_location != null && _location!.isNotEmpty ? " at $_location" : ""}',
+                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                      ),
+                      if (_notes != null && _notes!.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
+                          child: Text(
+                            _notes!,
+                            style: textTheme.bodyLarge?.copyWith(
+                              color: colorScheme.onSurface,
+                              height: 1.5,
+                            ),
+                          ),
+                        )
+                      else
+                        const SizedBox(height: 24), // Maintain some space if no notes
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -178,8 +182,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
               inactiveColor: colorScheme.surfaceContainerHighest,
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0), // Keep horizontal padding for time texts
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -194,7 +197,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 12), // Adjusted spacing
+            const SizedBox(height: 12),
             Center(
               child: IconButton(
                 icon: Icon(
@@ -205,7 +208,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                 onPressed: _togglePlayPause,
               ),
             ),
-            const SizedBox(height: 25), // Spacing at the very bottom
+            const SizedBox(height: 25),
           ],
         ),
       ),
