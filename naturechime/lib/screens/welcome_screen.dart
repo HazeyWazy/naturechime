@@ -127,7 +127,7 @@ class WelcomeScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           CupertinoPageRoute(
-                            builder: (context) => const MainScreen(),
+                            builder: (context) => const MainScreen(initialIndex: 2),
                           ),
                         );
                       },
