@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:naturechime/screens/playback_screen.dart';
 
 class RecordingListItem extends StatelessWidget {
   final String title;
   final DateTime dateTime;
   final int durationSeconds;
   final String? location;
-  final VoidCallback onPlay;
 
   const RecordingListItem({
     super.key,
@@ -15,7 +15,6 @@ class RecordingListItem extends StatelessWidget {
     required this.dateTime,
     required this.durationSeconds,
     this.location,
-    required this.onPlay,
   });
 
   String _formatDuration(int totalSeconds) {
@@ -106,9 +105,23 @@ class RecordingListItem extends StatelessWidget {
             color: colorScheme.primary,
             size: 30,
           ),
-          onPressed: onPlay,
+          onPressed: () {
+            Navigator.push(
+              context,
+              CupertinoModalPopupRoute(
+                builder: (context) => const PlaybackScreen(),
+              ),
+            );
+          },
         ),
-        onTap: onPlay, // Allow tapping anywhere on the list item to play
+        onTap: () {
+          Navigator.push(
+            context,
+            CupertinoModalPopupRoute(
+              builder: (context) => const PlaybackScreen(),
+            ),
+          );
+        },
       ),
     );
   }
