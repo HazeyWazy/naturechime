@@ -224,4 +224,43 @@ class AuthService extends ChangeNotifier {
 
     return querySnapshot.docs.isNotEmpty;
   }
+
+  // Delete user account (Firebase Auth user, then Firestore data)
+  Future<void> deleteUserAccount() async {
+    final User? currentUser = _auth.currentUser;
+    if (currentUser == null) {
+      throw Exception("No user logged in to delete.");
+    }
+
+    final String userId = currentUser.uid;
+
+    try {
+      // Delete Firebase Auth user FIRST
+      // This is the sensitive operation that might require recent sign-in.
+      await currentUser.delete();
+      debugPrint("User deleted from Firebase Auth for UID: $userId");
+
+      // Step 2: If Auth deletion was successful, delete Firestore document
+      await _firestore.collection('users').doc(userId).delete();
+      debugPrint("User document deleted from Firestore for UID: $userId");
+
+      // Step 3: (No-op) Attempt to delete Cloudinary image if Auth and Firestore deletion were successful
+      // if (profileImageUrl != null && profileImageUrl.isNotEmpty) {
+      //   await _deleteImageFromCloudinary(profileImageUrl);
+      // }
+    } on FirebaseAuthException catch (e) {
+      debugPrint("FirebaseAuthException during account deletion: ${e.code} - ${e.message}");
+      if (e.code == 'requires-recent-login') {
+        // IMPORTANT: Firestore document was NOT deleted if we are in this block.
+        throw Exception(
+            'This operation is sensitive and requires recent authentication. Please sign out and sign back in, then try deleting your account again.');
+      }
+      throw Exception("Failed to delete Firebase Auth user: ${e.message}");
+    } catch (e) {
+      debugPrint("Error deleting user account: ${e.toString()}");
+      // Potentially, Firestore doc might not have been deleted if error occurred after Auth delete but before Firestore delete.
+      // However, the primary goal is to ensure Auth delete is attempted first.
+      throw Exception("An unexpected error occurred while deleting the account: ${e.toString()}");
+    }
+  }
 }

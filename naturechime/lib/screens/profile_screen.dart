@@ -21,6 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   UserModel? _userModel;
   bool _isLoading = true;
   bool _isUpdatingPicture = false; // For loading indicator during picture update
+  bool _isDeletingAccount = false; // For loading indicator during account deletion
 
   @override
   void initState() {
@@ -143,6 +144,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _confirmDeleteAccount() async {
+    if (!mounted) return;
+
+    final bool? confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: const Text('Delete Account?'),
+        content: const Text(
+            'Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently lost.'),
+        actions: <CupertinoDialogAction>[
+          CupertinoDialogAction(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop(false); // Not confirmed
+            },
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: const Text('Delete'),
+            onPressed: () {
+              Navigator.of(context).pop(true); // Confirmed
+            },
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      if (!mounted) return;
+      setState(() {
+        _isDeletingAccount = true;
+      });
+
+      final authService = Provider.of<AuthService>(context, listen: false);
+      try {
+        await authService.deleteUserAccount();
+        if (!mounted) return;
+        // Navigate to Welcome Screen and show success message
+        Navigator.of(context).pushAndRemoveUntil(
+          CupertinoPageRoute(builder: (context) => const WelcomeScreen()),
+          (Route<dynamic> route) => false, // Remove all routes
+        );
+        // Show SnackBar on the WelcomeScreen (or use a global SnackBar service if available)
+        // For simplicity, we assume WelcomeScreen can show it or we just log it.
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Account deleted successfully.')),
+        );
+      } catch (e, s) {
+        debugPrint("Error deleting account: $e\n$s");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to delete account: ${e.toString()}')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isDeletingAccount = false;
+          });
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -158,7 +223,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           if (snapshot.connectionState == ConnectionState.waiting ||
               _isLoading ||
-              _isUpdatingPicture) {
+              _isUpdatingPicture ||
+              _isDeletingAccount) {
             return Center(
                 child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -168,6 +234,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const Padding(
                     padding: EdgeInsets.only(top: 16.0),
                     child: Text("Updating picture..."),
+                  ),
+                if (_isDeletingAccount)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 16.0),
+                    child: Text("Deleting account..."),
                   ),
               ],
             ));
@@ -318,9 +389,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: ElevatedButton.icon(
                     icon: const Icon(CupertinoIcons.trash_fill),
                     label: const Text('Delete Account'),
-                    onPressed: () {
-                      // Handle delete account
-                    },
+                    onPressed: _isDeletingAccount ? null : _confirmDeleteAccount,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colorScheme.error,
                       foregroundColor: colorScheme.onError,
