@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:naturechime/models/recording_model.dart';
 import 'package:naturechime/widgets/recording_list_item.dart';
 
 class LibraryScreen extends StatefulWidget {
@@ -9,50 +11,73 @@ class LibraryScreen extends StatefulWidget {
 }
 
 class _LibraryScreenState extends State<LibraryScreen> {
-  // Sample data
-  final List<Map<String, dynamic>> _recordings = [
-    {
-      'title': 'Morning Birds',
-      'dateTime': DateTime.now().subtract(const Duration(days: 1)),
-      'durationSeconds': 125,
-      'location': 'Backyard',
-    },
-    {
-      'title': 'Rainy Night',
-      'dateTime': DateTime.now().subtract(const Duration(hours: 5)),
-      'durationSeconds': 300,
-      'location': 'Window Sill',
-    },
-    {
-      'title': 'Forest Ambience',
-      'dateTime': DateTime.now().subtract(const Duration(days: 2, hours: 3)),
-      'durationSeconds': 600,
-      // 'location': null, // No location
-    },
-    {
-      'title': 'Beach Waves',
-      'dateTime': DateTime.now().subtract(const Duration(days: 5)),
-      'durationSeconds': 240,
-      'location': 'Sandy Beach',
-    },
-    {
-      'title': 'City Park Sounds',
-      'dateTime': DateTime.now().subtract(const Duration(hours: 12)),
-      'durationSeconds': 180,
-      'location': 'Central Park',
-    },
-    {
-      'title': 'Night Crickets',
-      'dateTime': DateTime.now().subtract(const Duration(days: 3)),
-      'durationSeconds': 450,
-      'location': 'Camping Site',
-    },
-    {
-      'title': 'Night Crickets',
-      'dateTime': DateTime.now().subtract(const Duration(days: 3)),
-      'durationSeconds': 450,
-      'location': 'Camping Site',
-    },
+  final List<Recording> _recordings = [
+    Recording(
+      id: 'lib_rec_1',
+      userId: 'user123',
+      username: 'LibraryUser1',
+      title: 'Morning Birds',
+      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
+      durationSeconds: 125,
+      location: 'Backyard',
+      audioUrl: 'https://example.com/lib_audio1.mp3',
+      notes: 'Clear morning sounds.',
+    ),
+    Recording(
+      id: 'lib_rec_2',
+      userId: 'user456',
+      username: 'LibraryUser2',
+      title: 'Rainy Night',
+      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 5))),
+      durationSeconds: 300,
+      location: 'Window Sill',
+      audioUrl: 'https://example.com/lib_audio2.mp3',
+      notes: 'Soothing rain.',
+    ),
+    Recording(
+      id: 'lib_rec_3',
+      userId: 'user789',
+      username: 'LibraryUser3',
+      title: 'Forest Ambience',
+      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 2, hours: 3))),
+      durationSeconds: 600,
+      location: null, // No location
+      audioUrl: 'https://example.com/lib_audio3.mp3',
+      notes: null,
+    ),
+    Recording(
+      id: 'lib_rec_4',
+      userId: 'user123',
+      username: 'LibraryUser1', // Same user, different recording
+      title: 'Beach Waves',
+      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 5))),
+      durationSeconds: 240,
+      location: 'Sandy Beach',
+      audioUrl: 'https://example.com/lib_audio4.mp3',
+      notes: 'Peaceful waves.',
+    ),
+    Recording(
+      id: 'lib_rec_5',
+      userId: 'userABC',
+      username: 'LibraryUser4',
+      title: 'City Park Sounds',
+      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 12))),
+      durationSeconds: 180,
+      location: 'Central Park',
+      audioUrl: 'https://example.com/lib_audio5.mp3',
+      notes: 'Urban soundscape.',
+    ),
+    Recording(
+      id: 'lib_rec_6',
+      userId: 'userXYZ',
+      username: 'LibraryUser5',
+      title: 'Night Crickets',
+      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 3))),
+      durationSeconds: 450,
+      location: 'Camping Site',
+      audioUrl: 'https://example.com/lib_audio6.mp3',
+      notes: 'Loud crickets!',
+    ),
   ];
 
   @override
@@ -87,19 +112,31 @@ class _LibraryScreenState extends State<LibraryScreen> {
             ),
             const SizedBox(height: 16.0),
             Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                itemCount: _recordings.length,
-                itemBuilder: (context, index) {
-                  final recording = _recordings[index];
-                  return RecordingListItem(
-                    title: recording['title'],
-                    dateTime: recording['dateTime'],
-                    durationSeconds: recording['durationSeconds'],
-                    location: recording['location'],
-                  );
-                },
-              ),
+              child: _recordings.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No recordings in your library yet.',
+                        style: textTheme.titleMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: _recordings.length,
+                      itemBuilder: (context, index) {
+                        final recording = _recordings[index];
+                        return RecordingListItem(
+                          key: ValueKey(recording.id),
+                          title: recording.title,
+                          dateTime: recording.createdAt.toDate(),
+                          durationSeconds: recording.durationSeconds,
+                          location: recording.location,
+                          username: recording.username ?? 'Unknown User',
+                          userId: recording.userId,
+                          notes: recording.notes,
+                        );
+                      },
+                    ),
             ),
           ],
         ),
