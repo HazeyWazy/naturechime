@@ -50,10 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _onPlayRecordingPressed(Map<String, dynamic> recording) {
-    debugPrint("Play pressed for: ${recording['title']}");
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -163,7 +159,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       dateTime: recording['dateTime'] as DateTime,
                       durationSeconds: recording['durationSeconds'] as int,
                       location: recording['location'] as String?,
-                      onPlay: () => _onPlayRecordingPressed(recording),
                     );
                   },
                 ),
