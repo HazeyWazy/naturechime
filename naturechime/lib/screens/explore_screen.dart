@@ -12,51 +12,59 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
-  // Use a Future to hold the recordings from Firestore
-  Future<List<Recording>>? _recordingsFuture;
-  List<Recording> _allRecordings = []; // To store all fetched recordings
+  // Use a Stream to hold the recordings from Firestore for real-time updates
+  Stream<List<Recording>>? _recordingsStream;
+  List<Recording> _allRecordings = []; // To store all fetched recordings from the stream
   List<Recording> _filteredRecordings = []; // For displaying filtered results
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _recordingsFuture = _fetchRecordingsFromFirestore();
-    _searchController.addListener(_filterRecordings);
+    _recordingsStream = _getRecordingsStream();
+    _searchController.addListener(() {
+      _applyFilter();
+      // Ensure UI rebuilds when search text changes
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
-  Future<List<Recording>> _fetchRecordingsFromFirestore() async {
-    try {
-      final querySnapshot = await FirebaseFirestore.instance.collection('recordings').get();
-      _allRecordings =
-          querySnapshot.docs.map((doc) => Recording.fromFirestore(doc.data(), doc.id)).toList();
-      // Initially, filtered recordings are all recordings
-      _filteredRecordings = List.from(_allRecordings);
-      return _allRecordings;
-    } catch (e) {
-      debugPrint('Error fetching recordings: $e');
-      return []; // Return empty list on error
-    }
+  Stream<List<Recording>> _getRecordingsStream() {
+    return FirebaseFirestore.instance
+        .collection('recordings')
+        .orderBy('createdAt', descending: true) // Show newest first
+        .snapshots()
+        .map((snapshot) {
+      try {
+        return snapshot.docs.map((doc) => Recording.fromFirestore(doc.data(), doc.id)).toList();
+      } catch (e) {
+        debugPrint('Error mapping recordings stream: $e');
+        return []; // Return empty list on error during mapping
+      }
+    });
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_filterRecordings);
+    _searchController.removeListener(_applyFilter); // Should match the added listener
     _searchController.dispose();
     super.dispose();
   }
 
-  void _filterRecordings() {
+  void _applyFilter() {
     final query = _searchController.text.toLowerCase();
-    setState(() {
-      // Filter from _allRecordings
+    if (query.isEmpty) {
+      _filteredRecordings = List.from(_allRecordings);
+    } else {
       _filteredRecordings = _allRecordings.where((recording) {
         final titleMatch = recording.title.toLowerCase().contains(query);
         final locationMatch = recording.location?.toLowerCase().contains(query) ?? false;
         final usernameMatch = recording.username?.toLowerCase().contains(query) ?? false;
         return titleMatch || locationMatch || usernameMatch;
       }).toList();
-    });
+    }
   }
 
   @override
@@ -96,14 +104,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: FutureBuilder<List<Recording>>(
-              future: _recordingsFuture,
+            child: StreamBuilder<List<Recording>>(
+              stream: _recordingsStream,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
                 if (snapshot.hasError) {
-                  debugPrint('Snapshot error: ${snapshot.error}');
+                  debugPrint('StreamBuilder error: ${snapshot.error}');
                   return Center(
                     child: Text(
                       'Error loading recordings. Please try again later.',
@@ -112,7 +117,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     ),
                   );
                 }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                _allRecordings = snapshot.data ?? [];
+                _applyFilter(); // Apply search filter to the latest data
+
+                if (_allRecordings.isEmpty) {
                   return Center(
                     child: Text(
                       'No recordings available yet.',
@@ -122,7 +135,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   );
                 }
 
-                // Use _filteredRecordings for the list view
                 if (_filteredRecordings.isEmpty && _searchController.text.isNotEmpty) {
                   return Center(
                     child: Text(
@@ -133,44 +145,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   );
                 }
 
-                // If search is empty and _allRecordings is empty (covered by !snapshot.hasData),
-                // or if search has text but _filteredRecordings is empty.
-                // The list to display is always _filteredRecordings.
-                // If _allRecordings is not empty but _filteredRecordings becomes empty due to search,
-                // then the "No recordings found matching your search" message is shown.
-                // If _allRecordings is initially empty, "No recordings available yet" is shown.
-
-                final recordingsToShow = _searchController.text.isEmpty &&
-                        _filteredRecordings.isEmpty &&
-                        _allRecordings.isNotEmpty
-                    ? _allRecordings // Show all if search is empty and filtered is empty (implies initial load with data)
-                    : _filteredRecordings;
-
-                if (recordingsToShow.isEmpty && _searchController.text.isNotEmpty) {
-                  return Center(
-                    child: Text(
-                      'No recordings found matching your search.',
-                      style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                }
-
-                if (recordingsToShow.isEmpty && _allRecordings.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No recordings available yet.',
-                      style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                }
+                // If _filteredRecordings is empty and search is also empty,
+                // it implies _allRecordings was empty, handled by the first check.
 
                 return ListView.builder(
                   padding: const EdgeInsets.only(top: 8.0),
-                  itemCount: recordingsToShow.length,
+                  itemCount: _filteredRecordings.length, // Display filtered recordings
                   itemBuilder: (context, index) {
-                    final recording = recordingsToShow[index];
+                    final recording = _filteredRecordings[index];
                     return RecordingListItem(
                       key: ValueKey(recording.id),
                       title: recording.title,
