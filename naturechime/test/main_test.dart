@@ -15,7 +15,7 @@ class MockAuthService extends Mock implements AuthService {}
 void main() {
   setUpAll(() async {
     // Use the new mock setup for Firebase
-    await firebase_mocks.setupFirebaseAuthMocks();
+    await firebase_mocks.setupFirebaseAuthMocksAndGetApp();
   });
 
   late MockAuthService mockAuthService;
