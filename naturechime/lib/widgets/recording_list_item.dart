@@ -13,6 +13,7 @@ class RecordingListItem extends StatelessWidget {
   final String username;
   final String? notes;
   final String userId;
+  final String audioUrl;
 
   const RecordingListItem({
     super.key,
@@ -23,6 +24,7 @@ class RecordingListItem extends StatelessWidget {
     required this.username,
     this.notes,
     required this.userId,
+    required this.audioUrl,
   });
 
   String _formatDuration(int totalSeconds) {
@@ -45,6 +47,7 @@ class RecordingListItem extends StatelessWidget {
           initialNotes: notes,
           initialDurationSeconds: durationSeconds,
           isCurrentUserRecording: userId == currentUserId,
+          audioUrl: audioUrl,
         ),
       ),
     );

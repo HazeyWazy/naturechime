@@ -10,7 +10,8 @@ class PlaybackScreen extends StatefulWidget {
   final String initialUsername;
   final String? initialNotes;
   final int initialDurationSeconds;
-  final bool isCurrentUserRecording; // Added to control edit button visibility
+  final bool isCurrentUserRecording;
+  final String audioUrl;
 
   const PlaybackScreen({
     super.key,
@@ -22,6 +23,7 @@ class PlaybackScreen extends StatefulWidget {
         'A beautiful morning in the rainforest, birds chirping and leaves rustling. Captured the essence perfectly.',
     this.initialDurationSeconds = 300, // 5 minutes
     this.isCurrentUserRecording = false, // Default to false
+    required this.audioUrl,
   });
 
   @override
@@ -38,8 +40,6 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
 
   bool _isPlaying = false;
   double _currentSliderValue = 0.0;
-  // Simulate playback progress for now
-  // In a real app, this would be updated by an audio player service
   Duration _currentPosition = Duration.zero;
 
   @override
@@ -164,7 +164,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                 ),
               ),
             ),
-            // Playback Controls Section - now at the bottom
+            // Playback Controls Section
             const SizedBox(height: 16), // Spacing before controls
             Slider(
               value: _currentSliderValue,

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:naturechime/models/recording_model.dart';
 import 'package:naturechime/widgets/recording_list_item.dart';
@@ -11,74 +12,72 @@ class LibraryScreen extends StatefulWidget {
 }
 
 class _LibraryScreenState extends State<LibraryScreen> {
-  final List<Recording> _recordings = [
-    Recording(
-      id: 'lib_rec_1',
-      userId: 'user123',
-      username: 'LibraryUser1',
-      title: 'Morning Birds',
-      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
-      durationSeconds: 125,
-      location: 'Backyard',
-      audioUrl: 'https://example.com/lib_audio1.mp3',
-      notes: 'Clear morning sounds.',
-    ),
-    Recording(
-      id: 'lib_rec_2',
-      userId: 'user456',
-      username: 'LibraryUser2',
-      title: 'Rainy Night',
-      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 5))),
-      durationSeconds: 300,
-      location: 'Window Sill',
-      audioUrl: 'https://example.com/lib_audio2.mp3',
-      notes: 'Soothing rain.',
-    ),
-    Recording(
-      id: 'lib_rec_3',
-      userId: 'user789',
-      username: 'LibraryUser3',
-      title: 'Forest Ambience',
-      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 2, hours: 3))),
-      durationSeconds: 600,
-      location: null, // No location
-      audioUrl: 'https://example.com/lib_audio3.mp3',
-      notes: null,
-    ),
-    Recording(
-      id: 'lib_rec_4',
-      userId: 'user123',
-      username: 'LibraryUser1', // Same user, different recording
-      title: 'Beach Waves',
-      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 5))),
-      durationSeconds: 240,
-      location: 'Sandy Beach',
-      audioUrl: 'https://example.com/lib_audio4.mp3',
-      notes: 'Peaceful waves.',
-    ),
-    Recording(
-      id: 'lib_rec_5',
-      userId: 'userABC',
-      username: 'LibraryUser4',
-      title: 'City Park Sounds',
-      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 12))),
-      durationSeconds: 180,
-      location: 'Central Park',
-      audioUrl: 'https://example.com/lib_audio5.mp3',
-      notes: 'Urban soundscape.',
-    ),
-    Recording(
-      id: 'lib_rec_6',
-      userId: 'userXYZ',
-      username: 'LibraryUser5',
-      title: 'Night Crickets',
-      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 3))),
-      durationSeconds: 450,
-      location: 'Camping Site',
-      audioUrl: 'https://example.com/lib_audio6.mp3',
-      notes: 'Loud crickets!',
-    ),
-  ];
+  List<Recording> _recordings = [];
+  bool _isLoading = true;
+  String? _loggedInUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    _getLoggedInUserAndFetchRecordings();
+  }
+
+  Future<void> _getLoggedInUserAndFetchRecordings() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      setState(() {
+        _loggedInUserId = currentUser.uid;
+      });
+      await _fetchUserRecordings();
+    } else {
+      setState(() {
+        _isLoading = false;
+        _recordings = [];
+      });
+      debugPrint("LibraryScreen: No user logged in.");
+    }
+  }
+
+  Future<void> _fetchUserRecordings() async {
+    if (_loggedInUserId == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('recordings')
+          .where('userId', isEqualTo: _loggedInUserId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      final fetchedRecordings =
+          querySnapshot.docs.map((doc) => Recording.fromFirestore(doc.data(), doc.id)).toList();
+
+      if (mounted) {
+        setState(() {
+          _recordings = fetchedRecordings;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching recordings: $e");
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load recordings: ${e.toString()}')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +89,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,41 +101,63 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     color: colorScheme.onSurface,
                   ),
                 ),
-                Text(
-                  '${_recordings.length} Recordings',
-                  style: textTheme.titleSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
+                _isLoading
+                    ? Text(
+                        'Loading recordings...',
+                        style: textTheme.titleSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      )
+                    : Text(
+                        _loggedInUserId == null
+                            ? 'Please log in to see your recordings'
+                            : '${_recordings.length} Recordings',
+                        style: textTheme.titleSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
               ],
             ),
             const SizedBox(height: 16.0),
             Expanded(
-              child: _recordings.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No recordings in your library yet.',
-                        style: textTheme.titleMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: EdgeInsets.zero,
-                      itemCount: _recordings.length,
-                      itemBuilder: (context, index) {
-                        final recording = _recordings[index];
-                        return RecordingListItem(
-                          key: ValueKey(recording.id),
-                          title: recording.title,
-                          dateTime: recording.createdAt.toDate(),
-                          durationSeconds: recording.durationSeconds,
-                          location: recording.location,
-                          username: recording.username ?? 'Unknown User',
-                          userId: recording.userId,
-                          notes: recording.notes,
-                        );
-                      },
-                    ),
+              child: _isLoading
+                  ? Center(child: CircularProgressIndicator(color: colorScheme.primary))
+                  : _loggedInUserId == null
+                      ? Center(
+                          child: Text(
+                            'You need to be logged in to view your library.',
+                            style: textTheme.titleMedium
+                                ?.copyWith(color: colorScheme.onSurfaceVariant),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                      : _recordings.isEmpty
+                          ? Center(
+                              child: Text(
+                                'No recordings in your library yet. Go make some!',
+                                style: textTheme.titleMedium
+                                    ?.copyWith(color: colorScheme.onSurfaceVariant),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: _recordings.length,
+                              itemBuilder: (context, index) {
+                                final recording = _recordings[index];
+                                return RecordingListItem(
+                                  key: ValueKey(recording.id),
+                                  title: recording.title,
+                                  dateTime: recording.createdAt.toDate(),
+                                  durationSeconds: recording.durationSeconds,
+                                  location: recording.location,
+                                  username: recording.username ?? 'Unknown User',
+                                  userId: recording.userId,
+                                  notes: recording.notes,
+                                  audioUrl: recording.audioUrl,
+                                );
+                              },
+                            ),
             ),
           ],
         ),

@@ -23,19 +23,18 @@ class Recording {
     this.notes, // Added
   });
 
-  // Factory constructor to create a Recording
-  factory Recording.fromSnapshot(DocumentSnapshot snap) {
-    var snapshot = snap.data() as Map<String, dynamic>;
+  // Factory constructor to create a Recording from a Firestore document
+  factory Recording.fromFirestore(Map<String, dynamic> data, String documentId) {
     return Recording(
-      id: snap.id,
-      userId: snapshot['userId'] ?? '',
-      title: snapshot['title'] ?? '',
-      audioUrl: snapshot['audioUrl'] ?? '',
-      createdAt: snapshot['createdAt'] ?? Timestamp.now(),
-      durationSeconds: snapshot['durationSeconds'] ?? 0,
-      location: snapshot['location'] as String?,
-      username: snapshot['username'] as String?,
-      notes: snapshot['notes'] as String?,
+      id: documentId,
+      userId: data['userId'] ?? '',
+      title: data['title'] ?? '',
+      audioUrl: data['audioUrl'] ?? '',
+      createdAt: data['createdAt'] ?? Timestamp.now(),
+      durationSeconds: data['durationSeconds'] ?? 0,
+      location: data['location'] as String?,
+      username: data['username'] as String?,
+      notes: data['notes'] as String?,
     );
   }
 

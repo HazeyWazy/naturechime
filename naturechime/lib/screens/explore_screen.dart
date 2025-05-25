@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:naturechime/models/recording_model.dart';
 import 'package:naturechime/widgets/recording_list_item.dart';
 
-// Mock data now uses the Recording model
-// Note: audioUrl is part of the model but not directly used in this list item's display logic yet.
 final List<Recording> _mockRecordings = [
   Recording(
     id: '1',
@@ -149,10 +147,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         dateTime: recording.createdAt.toDate(),
                         durationSeconds: recording.durationSeconds,
                         location: recording.location,
-                        // username is now part of the Recording model
                         username: recording.username ?? 'Unknown User', // Provide a fallback
                         notes: recording.notes,
                         userId: recording.userId,
+                        audioUrl: recording.audioUrl,
                       );
                     },
                   ),

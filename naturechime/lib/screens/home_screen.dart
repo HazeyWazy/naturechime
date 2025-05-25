@@ -13,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Placeholder data for recordings, now using Recording model
+  // Placeholder data for recordings using Recording model
   final List<Recording> _sampleRecordings = [
     Recording(
       id: 'home_rec_1',
@@ -52,13 +52,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onRecordButtonPressed() {
     final isMainScreenOnTop =
-        ModalRoute.of(context)?.settings.name == '/'; // Assuming MainScreen is your home route
+        ModalRoute.of(context)?.settings.name == '/';
 
     if (isMainScreenOnTop && mounted) {
-      // If MainScreen is already visible, try to update its index if possible
-      // This requires MainScreen's state to be accessible, e.g. via a GlobalKey or inherited widget.
-      // For now, we'll just navigate, which re-instantiates MainScreen with the new index.
-      // This is what the original code was doing by pushing MainScreen.
       Navigator.of(context).pushReplacement(
         // Using pushReplacement to avoid stacking MainScreens
         CupertinoPageRoute(
@@ -195,6 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       username: recording.username ?? 'Unknown User',
                       userId: recording.userId,
                       notes: recording.notes,
+                      audioUrl: recording.audioUrl,
                     );
                   },
                 ),
