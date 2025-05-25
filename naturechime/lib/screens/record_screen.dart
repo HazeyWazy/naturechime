@@ -454,6 +454,25 @@ class _RecordScreenState extends State<RecordScreen> {
       _isUploading = true;
     });
 
+    String recorderUsername = 'Unknown User'; // Default fallback
+    if (_userModel != null &&
+        _userModel!.displayName != null &&
+        _userModel!.displayName!.isNotEmpty) {
+      recorderUsername = _userModel!.displayName!;
+    } else {
+      final fallbackFirebaseUser = FirebaseAuth.instance.currentUser;
+      if (fallbackFirebaseUser != null &&
+          fallbackFirebaseUser.displayName != null &&
+          fallbackFirebaseUser.displayName!.isNotEmpty) {
+        recorderUsername = fallbackFirebaseUser.displayName!;
+        debugPrint(
+            "RecordScreen _saveRecording: Used FirebaseUser.displayName as fallback for recorder username: $recorderUsername");
+      } else {
+        debugPrint(
+            "RecordScreen _saveRecording: Warning - UserModel.displayName not available, and FirebaseUser.displayName also not available. Saving recording with username '$recorderUsername'. UserID: ${currentUser.uid}");
+      }
+    }
+
     try {
       // Upload to Cloudinary
       CloudinaryResponse response = await _cloudinary!.uploadFile(
@@ -472,6 +491,7 @@ class _RecordScreenState extends State<RecordScreen> {
       Recording newRecording = Recording(
         id: '',
         userId: currentUser.uid,
+        username: recorderUsername,
         title: _titleController.text.trim(),
         audioUrl: downloadUrl,
         createdAt: Timestamp.now(),
