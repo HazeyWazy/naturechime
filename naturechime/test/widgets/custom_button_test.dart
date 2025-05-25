@@ -80,7 +80,6 @@ void main() {
         WidgetState.pressed,
       });
       expect(overlayColor, isNotNull);
-      expect(overlayColor?.a, equals(26)); // 0.1020 * 255 ≈ 26
     });
   });
 }

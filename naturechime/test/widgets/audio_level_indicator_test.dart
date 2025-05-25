@@ -40,11 +40,16 @@ void main() {
         )
         .toList();
 
-    // Check if approximately half the bars are active (have non-transparent color)
+    // Check if approximately half the bars are active
     int activeBarCount = containers.where((container) {
-      final decoration = container.decoration as BoxDecoration;
-      final color = decoration.color!;
-      return color.a == 255; // Fully opaque colors are active bars
+      final BoxDecoration? decoration = container.decoration as BoxDecoration?;
+      final Color? color = decoration?.color;
+
+      bool isFullyOpaque = false;
+      if (color != null && color.a == 1.0) {
+        isFullyOpaque = true;
+      }
+      return isFullyOpaque;
     }).length;
 
     expect(activeBarCount, (barCount * audioLevel).round());
