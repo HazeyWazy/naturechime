@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:naturechime/models/recording_model.dart';
+import 'package:naturechime/models/user_model.dart';
 import 'package:naturechime/widgets/audio_level_indicator.dart';
 import 'package:record/record.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -27,6 +28,7 @@ class _RecordScreenState extends State<RecordScreen> {
   final TextEditingController _titleController = TextEditingController(text: 'Recording title');
   late AudioRecorder _audioRecorder;
   StreamSubscription<Amplitude>? _amplitudeSubscription;
+  StreamSubscription<User?>? _userSubscription;
   String? _currentRecordingPath;
   Timer? _timer;
   int _recordingDurationSeconds = 0;
@@ -35,7 +37,10 @@ class _RecordScreenState extends State<RecordScreen> {
   // Cloudinary Configuration
   String? _cloudinaryCloudName;
   String? _cloudinaryUploadPreset;
-  CloudinaryPublic? _cloudinary; // Nullable
+  CloudinaryPublic? _cloudinary;
+
+  UserModel? _userModel; // To store fetched user data from Firestore
+  bool _isLoadingUserModel = false; // To manage loading state for user model
 
   @override
   void initState() {
@@ -75,10 +80,163 @@ class _RecordScreenState extends State<RecordScreen> {
     }
 
     final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null && (currentUser.displayName?.isNotEmpty ?? false)) {
-      _titleController.text = "${currentUser.displayName}'s Recording";
+    debugPrint("RecordScreen initState: Initial Firebase User ID: ${currentUser?.uid}");
+    _fetchUserModelAndSetTitle(currentUser); // Fetch UserModel on init
+
+    _userSubscription = FirebaseAuth.instance.userChanges().listen((User? firebaseUser) async {
+      debugPrint(
+          "RecordScreen userChanges listener: Firebase User event. UID: ${firebaseUser?.uid}");
+      if (firebaseUser != null) {
+        // It's good practice to reload to get the latest auth state,
+        // though displayName here will come from Firestore.
+        try {
+          await firebaseUser.reload();
+          final refreshedFirebaseUser = FirebaseAuth.instance.currentUser;
+          if (mounted) {
+            _fetchUserModelAndSetTitle(refreshedFirebaseUser);
+          }
+        } catch (e) {
+          debugPrint("RecordScreen userChanges listener: Error reloading firebaseUser: $e");
+          if (mounted) {
+            _fetchUserModelAndSetTitle(firebaseUser); // Use the user from stream on error
+          }
+        }
+      } else {
+        // User logged out
+        if (mounted) {
+          setState(() {
+            _userModel = null; // Clear user model on logout
+          });
+          _setDefaultTitle(); // Set default title for logged-out state
+        }
+      }
+    });
+  }
+
+  Future<void> _fetchUserModelAndSetTitle(User? firebaseUser) async {
+    if (!mounted) return;
+
+    if (firebaseUser == null) {
+      debugPrint("_fetchUserModelAndSetTitle: No Firebase user, clearing UserModel.");
+      setState(() {
+        _userModel = null;
+        _isLoadingUserModel = false;
+      });
+      _setDefaultTitle();
+      return;
+    }
+
+    // Avoid fetching if UID is the same and model already exists, unless forced
+    if (_userModel != null && _userModel!.uid == firebaseUser.uid && !_isLoadingUserModel) {
+      debugPrint(
+          "_fetchUserModelAndSetTitle: UserModel for ${firebaseUser.uid} already loaded. Setting title.");
+      _setDefaultTitle();
+      return;
+    }
+
+    setState(() {
+      _isLoadingUserModel = true;
+    });
+
+    try {
+      debugPrint("_fetchUserModelAndSetTitle: Fetching UserModel for UID: ${firebaseUser.uid}");
+      final userDocSnapshot =
+          await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).get();
+
+      if (!mounted) return;
+
+      if (userDocSnapshot.exists) {
+        // Explicitly cast to Map<String, dynamic> before passing to fromFirestore
+        final data = userDocSnapshot.data() as Map<String, dynamic>?;
+        if (data != null) {
+          setState(() {
+            _userModel =
+                UserModel.fromFirestore(userDocSnapshot as DocumentSnapshot<Map<String, dynamic>>);
+            debugPrint(
+                "_fetchUserModelAndSetTitle: UserModel loaded successfully for UID: ${_userModel?.uid}, DisplayName: ${_userModel?.displayName}");
+          });
+        } else {
+          debugPrint(
+              "_fetchUserModelAndSetTitle: User document data is null for UID: ${firebaseUser.uid}");
+          setState(() {
+            _userModel = null; // Ensure userModel is null if data is bad
+          });
+        }
+      } else {
+        debugPrint(
+            "_fetchUserModelAndSetTitle: User document not found in Firestore for UID: ${firebaseUser.uid}");
+        setState(() {
+          _userModel = null; // Clear user model if not found
+        });
+      }
+    } catch (e, s) {
+      debugPrint("_fetchUserModelAndSetTitle: Error fetching UserModel: $e\nStack trace: $s");
+      if (mounted) {
+        setState(() {
+          _userModel = null; // Clear on error
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingUserModel = false;
+        });
+        _setDefaultTitle(); // Always attempt to set title after fetch attempt
+      }
+    }
+  }
+
+  void _setDefaultTitle() {
+    // Now uses _userModel.displayName
+    final String? currentDisplayName = _userModel?.displayName;
+    final String defaultDateBasedTitle =
+        "My Recording ${DateFormat('yyyy-MM-dd').format(DateTime.now())}";
+    String newTitle;
+
+    if (currentDisplayName != null && currentDisplayName.isNotEmpty) {
+      newTitle = "$currentDisplayName's Recording";
+      debugPrint(
+          "RecordScreen _setDefaultTitle (from Firestore): DisplayName available ('$currentDisplayName'). Tentative title: '$newTitle'");
     } else {
-      _titleController.text = "My Recording ${DateFormat('yyyy-MM-dd').format(DateTime.now())}";
+      newTitle = defaultDateBasedTitle;
+      debugPrint(
+          "RecordScreen _setDefaultTitle (from Firestore): DisplayName null/empty in UserModel. Tentative title: '$newTitle'. User UID: ${_userModel?.uid}");
+    }
+
+    bool isPlaceholderTitle =
+        _titleController.text == 'Recording title' || _titleController.text.isEmpty;
+    bool isCurrentTitleADefaultNameBased = _titleController.text.endsWith("'s Recording");
+    bool isCurrentTitleADateBasedDefault = _titleController.text.startsWith("My Recording ") &&
+        _titleController.text.contains(DateFormat('yyyy-MM-dd').format(DateTime.now()));
+
+    if (newTitle == defaultDateBasedTitle) {
+      // DisplayName is not available or empty
+      if (isPlaceholderTitle || isCurrentTitleADefaultNameBased) {
+        if (_titleController.text != newTitle) {
+          setState(() {
+            _titleController.text = newTitle;
+            debugPrint("RecordScreen _setDefaultTitle: Set to date-based default: '$newTitle'");
+          });
+        }
+      } else {
+        debugPrint(
+            "RecordScreen _setDefaultTitle: DisplayName null/empty. Preserving custom title: '${_titleController.text}'");
+      }
+    } else {
+      // DisplayName is available, newTitle is "DisplayName's Recording"
+      if (isPlaceholderTitle ||
+          isCurrentTitleADateBasedDefault ||
+          isCurrentTitleADefaultNameBased) {
+        if (_titleController.text != newTitle) {
+          setState(() {
+            _titleController.text = newTitle;
+            debugPrint("RecordScreen _setDefaultTitle: Set to name-based default: '$newTitle'");
+          });
+        }
+      } else {
+        debugPrint(
+            "RecordScreen _setDefaultTitle: DisplayName available. Preserving custom title: '${_titleController.text}'");
+      }
     }
   }
 
@@ -86,6 +244,7 @@ class _RecordScreenState extends State<RecordScreen> {
   void dispose() {
     _timer?.cancel();
     _amplitudeSubscription?.cancel();
+    _userSubscription?.cancel();
     _audioRecorder.dispose();
     _titleController.dispose();
     super.dispose();
@@ -377,15 +536,10 @@ class _RecordScreenState extends State<RecordScreen> {
       _currentAudioLevel = 0.0;
       _recordingDurationSeconds = 0;
       _formattedTime = _formatDuration(0);
-
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null && (currentUser.displayName?.isNotEmpty ?? false)) {
-        _titleController.text = "${currentUser.displayName}'s Recording";
-      } else {
-        _titleController.text = "My Recording ${DateFormat('yyyy-MM-dd').format(DateTime.now())}";
-      }
-      _isRecording = false;
+      _isRecording = false; // Ensure recording state is reset
     });
+    _setDefaultTitle(); // Reset title based on current _userModel
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Recording discarded.')),
