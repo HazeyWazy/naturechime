@@ -402,120 +402,124 @@ class _RecordScreenState extends State<RecordScreen> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                const SizedBox(height: 20),
-                Text(
-                  'Record Sound',
-                  textAlign: TextAlign.center,
-                  style: textTheme.headlineSmall!.copyWith(color: colorScheme.onSurface),
-                ),
-                Text(
-                  formattedDate,
-                  textAlign: TextAlign.center,
-                  style: textTheme.titleMedium!.copyWith(
-                    fontWeight: FontWeight.normal,
-                    color: colorScheme.onSurface,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const SizedBox(height: 20),
+                  Text(
+                    'Record Sound',
+                    textAlign: TextAlign.center,
+                    style: textTheme.headlineSmall!.copyWith(color: colorScheme.onSurface),
                   ),
-                ),
-                const SizedBox(height: 30),
-                AudioLevelIndicator(audioLevel: _currentAudioLevel, barCount: 20),
-                const SizedBox(height: 30),
-                Text(
-                  _formattedTime,
-                  textAlign: TextAlign.center,
-                  style: textTheme.headlineMedium!.copyWith(color: colorScheme.onSurface),
-                ),
-                const SizedBox(height: 40),
-                Center(
-                  child: SizedBox(
-                    width: 90,
-                    height: 90,
-                    child: ElevatedButton(
-                      onPressed: _isUploading ? null : _toggleRecording, // Disable while uploading
-                      style: ElevatedButton.styleFrom(
-                        shape: const CircleBorder(),
-                        padding: const EdgeInsets.all(20),
-                        backgroundColor: _isRecording ? colorScheme.error : colorScheme.primary,
-                        foregroundColor: _isRecording ? colorScheme.onError : colorScheme.onPrimary,
-                      ),
-                      child: Icon(
-                        _isRecording ? CupertinoIcons.stop_fill : CupertinoIcons.mic_fill,
-                        size: 40,
-                      ),
+                  Text(
+                    formattedDate,
+                    textAlign: TextAlign.center,
+                    style: textTheme.titleMedium!.copyWith(
+                      fontWeight: FontWeight.normal,
+                      color: colorScheme.onSurface,
                     ),
                   ),
-                ),
-                const SizedBox(height: 50),
-                TextFormField(
-                  controller: _titleController,
-                  enabled: !_isRecording, // Disable title edit while recording
-                  decoration: InputDecoration(
-                    labelText: 'Recording Title',
-                    hintText: 'My Awesome Recording',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: colorScheme.outlineVariant),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: colorScheme.outlineVariant),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
+                  const SizedBox(height: 30),
+                  AudioLevelIndicator(audioLevel: _currentAudioLevel, barCount: 20),
+                  const SizedBox(height: 30),
+                  Text(
+                    _formattedTime,
+                    textAlign: TextAlign.center,
+                    style: textTheme.headlineMedium!.copyWith(color: colorScheme.onSurface),
                   ),
-                  style: TextStyle(color: colorScheme.onSurface),
-                ),
-                const SizedBox(height: 40),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    SizedBox(
-                      width: 120,
-                      child: ElevatedButton.icon(
+                  const SizedBox(height: 40),
+                  Center(
+                    child: SizedBox(
+                      width: 90,
+                      height: 90,
+                      child: ElevatedButton(
                         onPressed:
-                            _isUploading ? null : _discardRecording, // Disable while uploading
-                        icon: const Icon(CupertinoIcons.trash),
-                        label: const Text('Discard'),
+                            _isUploading ? null : _toggleRecording, // Disable while uploading
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.surfaceContainerHighest,
-                          foregroundColor: colorScheme.onErrorContainer,
+                          shape: const CircleBorder(),
+                          padding: const EdgeInsets.all(20),
+                          backgroundColor: _isRecording ? colorScheme.error : colorScheme.primary,
+                          foregroundColor:
+                              _isRecording ? colorScheme.onError : colorScheme.onPrimary,
+                        ),
+                        child: Icon(
+                          _isRecording ? CupertinoIcons.stop_fill : CupertinoIcons.mic_fill,
+                          size: 40,
                         ),
                       ),
                     ),
-                    SizedBox(
-                      width: 120,
-                      child: ElevatedButton.icon(
-                        onPressed: _isUploading || _isRecording
-                            ? null
-                            : _saveRecording, // Disable while uploading or recording
-                        icon: _isUploading
-                            ? SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: colorScheme.onPrimary,
-                                ))
-                            : const Icon(CupertinoIcons.check_mark_circled),
-                        label: Text(_isUploading ? 'Saving...' : 'Save'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.primary,
-                          foregroundColor: colorScheme.onPrimary,
-                        ),
+                  ),
+                  const SizedBox(height: 50),
+                  TextFormField(
+                    controller: _titleController,
+                    enabled: !_isRecording, // Disable title edit while recording
+                    decoration: InputDecoration(
+                      labelText: 'Recording Title',
+                      hintText: 'My Awesome Recording',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: colorScheme.outlineVariant),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: colorScheme.outlineVariant),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
                       ),
                     ),
-                  ],
-                ),
-              ],
+                    style: TextStyle(color: colorScheme.onSurface),
+                  ),
+                  const SizedBox(height: 40),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      SizedBox(
+                        width: 120,
+                        child: ElevatedButton.icon(
+                          onPressed:
+                              _isUploading ? null : _discardRecording, // Disable while uploading
+                          icon: const Icon(CupertinoIcons.trash),
+                          label: const Text('Discard'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colorScheme.surfaceContainerHighest,
+                            foregroundColor: colorScheme.onErrorContainer,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 120,
+                        child: ElevatedButton.icon(
+                          onPressed: _isUploading || _isRecording
+                              ? null
+                              : _saveRecording, // Disable while uploading or recording
+                          icon: _isUploading
+                              ? SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: colorScheme.onPrimary,
+                                  ))
+                              : const Icon(CupertinoIcons.check_mark_circled),
+                          label: Text(_isUploading ? 'Saving...' : 'Save'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
