@@ -299,6 +299,20 @@ class _RecordScreenState extends State<RecordScreen> {
 
   Future<void> _startRecording() async {
     debugPrint("_startRecording: Called");
+
+    // Check if user is logged in
+    if (_userModel == null) {
+      debugPrint("_startRecording: User not logged in. Showing SnackBar.");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('You must be logged in to record audio.'),
+          ),
+        );
+      }
+      return;
+    }
+
     final hasPermission = await _checkPermission();
     debugPrint("_startRecording: hasPermission = $hasPermission");
 
