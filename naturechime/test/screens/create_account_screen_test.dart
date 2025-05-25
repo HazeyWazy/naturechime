@@ -118,7 +118,8 @@ void main() {
     expect(find.byIcon(Icons.person), findsOneWidget);
     expect(find.text('Upload Profile Picture'), findsOneWidget);
     expect(usernameFieldFinder, findsOneWidget);
-    expect(find.text('This will be visible to other users.'), findsOneWidget);
+    expect(find.text('This will be visible to other users. You cannot change it later.'),
+        findsOneWidget);
     expect(emailFieldFinder, findsOneWidget);
     expect(passwordFieldFinder, findsOneWidget);
     expect(confirmPasswordFieldFinder, findsOneWidget);
