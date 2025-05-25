@@ -380,7 +380,7 @@ void main() {
 
       // Mock the updateUserProfilePicture method to simulate successful update
       when(mockAuthService.updateUserProfilePicture(any, any, any))
-          .thenAnswer((_) async => null);
+          .thenAnswer((_) async {});
 
       // Act
       await tester.pumpWidget(createWidgetUnderTest());
