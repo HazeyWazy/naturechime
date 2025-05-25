@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart'; // Import for kIsWeb
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:naturechime/models/recording_model.dart';
@@ -330,12 +331,41 @@ class _RecordScreenState extends State<RecordScreen> {
 
     try {
       debugPrint("_startRecording: Attempting to get temporary directory.");
-      final Directory dir = await path_provider.getTemporaryDirectory();
-      debugPrint("_startRecording: Temporary directory path = ${dir.path}");
+      String? recordingPath;
 
-      final fileName = 'recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
-      _currentRecordingPath = '${dir.path}/$fileName';
+      if (kIsWeb) {
+        debugPrint(
+            "_startRecording: Web platform detected. path_provider.getTemporaryDirectory() will not be called. Recording on web is not yet fully implemented.");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Recording on web browser is not yet supported.'),
+            ),
+          );
+        }
+        return; // Exit if on web and no alternative path/storage is set
+      } else {
+        // Mobile or other non-web platforms
+        final Directory dir = await path_provider.getTemporaryDirectory();
+        debugPrint("_startRecording: Temporary directory path = ${dir.path}");
+        final fileName = 'recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        recordingPath = '${dir.path}/$fileName';
+      }
+
+      _currentRecordingPath = recordingPath;
       debugPrint("_startRecording: Recording path set to: $_currentRecordingPath");
+
+      if (_currentRecordingPath == null || _currentRecordingPath!.isEmpty) {
+        debugPrint("_startRecording: Recording path is null or empty. Cannot start recording.");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not determine a path to save the recording.'),
+            ),
+          );
+        }
+        return;
+      }
 
       debugPrint("_startRecording: Attempting to call _audioRecorder.start()");
       await _audioRecorder.start(
