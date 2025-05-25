@@ -10,6 +10,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:naturechime/models/user_model.dart';
 import 'package:naturechime/services/auth_service.dart';
 
+// Test helper class to mock Firestore
+class TestFirestore {
+  static FirebaseFirestore? _instance;
+  static void setInstance(FirebaseFirestore instance) {
+    _instance = instance;
+  }
+
+  static FirebaseFirestore get instance {
+    return _instance ?? FirebaseFirestore.instance;
+  }
+}
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -45,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (currentUser != null) {
         final userDocSnapshot =
-            await FirebaseFirestore.instance.collection('users').doc(currentUser.uid).get();
+            await TestFirestore.instance.collection('users').doc(currentUser.uid).get();
 
         if (!mounted) return; // Check again after async gap
 
