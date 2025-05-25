@@ -103,7 +103,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
-                  print('Snapshot error: ${snapshot.error}');
+                  debugPrint('Snapshot error: ${snapshot.error}');
                   return Center(
                     child: Text(
                       'Error loading recordings. Please try again later.',
