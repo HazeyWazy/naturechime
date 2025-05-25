@@ -402,7 +402,8 @@ class _RecordScreenState extends State<RecordScreen> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500),
           child: SingleChildScrollView(
