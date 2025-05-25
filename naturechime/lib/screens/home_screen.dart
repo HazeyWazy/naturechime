@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:naturechime/models/recording_model.dart';
@@ -14,45 +15,85 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   // Placeholder data for recordings using Recording model
-  final List<Recording> _sampleRecordings = [
-    Recording(
-      id: 'home_rec_1',
-      userId: 'user789',
-      username: 'HomeUser1',
-      title: 'Morning Birds Chirping',
-      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 2))),
-      durationSeconds: 105,
-      location: 'Central Park, NYC',
-      audioUrl: 'https://example.com/home_audio1.mp3',
-      notes: 'A pleasant morning soundscape.',
-    ),
-    Recording(
-      id: 'home_rec_2',
-      userId: 'userABC',
-      username: 'HomeUser2',
-      title: 'Rainforest Ambience',
-      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1, hours: 5))),
-      durationSeconds: 300,
-      location: 'Amazon Rainforest',
-      audioUrl: 'https://example.com/home_audio2.mp3',
-      notes: 'Deep forest sounds.',
-    ),
-    Recording(
-      id: 'home_rec_3',
-      userId: 'userXYZ',
-      username: 'HomeUser3',
-      title: 'Ocean Waves Sound',
-      createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 3))),
-      durationSeconds: 180,
-      location: null,
-      audioUrl: 'https://example.com/home_audio3.mp3',
-      notes: null,
-    ),
-  ];
+
+  List<Recording> _recordings = [];
+  bool _isLoading = true;
+  String? _loggedInUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    _getLoggedInUserAndFetchRecordings();
+  }
+
+  Future<void> _getLoggedInUserAndFetchRecordings() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      if (mounted) {
+        setState(() {
+          _loggedInUserId = currentUser.uid;
+        });
+      }
+      await _fetchUserRecordings();
+    } else {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _recordings = [];
+        });
+      }
+      debugPrint("HomeScreen: No user logged in.");
+    }
+  }
+
+  Future<void> _fetchUserRecordings() async {
+    if (_loggedInUserId == null) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('recordings')
+          .where('userId', isEqualTo: _loggedInUserId)
+          .orderBy('createdAt', descending: true)
+          .limit(4) // Limit to 4 most recent recordings
+          .get();
+
+      final fetchedRecordings =
+          querySnapshot.docs.map((doc) => Recording.fromFirestore(doc.data(), doc.id)).toList();
+
+      if (mounted) {
+        setState(() {
+          _recordings = fetchedRecordings;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching recordings for HomeScreen: $e");
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load recent recordings: ${e.toString()}')),
+        );
+      }
+    }
+  }
 
   void _onRecordButtonPressed() {
-    final isMainScreenOnTop =
-        ModalRoute.of(context)?.settings.name == '/';
+    final isMainScreenOnTop = ModalRoute.of(context)?.settings.name == '/';
 
     if (isMainScreenOnTop && mounted) {
       Navigator.of(context).pushReplacement(
@@ -147,7 +188,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              if (_sampleRecordings.isEmpty)
+              if (_isLoading)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40.0),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                )
+              else if (_recordings.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 40.0),
                   child: Center(
@@ -179,9 +229,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _sampleRecordings.length > 3 ? 3 : _sampleRecordings.length,
+                  itemCount: _recordings.length,
                   itemBuilder: (context, index) {
-                    final recording = _sampleRecordings[index];
+                    final recording = _recordings[index];
                     return RecordingListItem(
                       key: ValueKey(recording.id),
                       title: recording.title,
@@ -193,6 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       notes: recording.notes,
                       audioUrl: recording.audioUrl,
                       recordingId: recording.id,
+                      onRefreshNeeded: _fetchUserRecordings,
                     );
                   },
                 ),
