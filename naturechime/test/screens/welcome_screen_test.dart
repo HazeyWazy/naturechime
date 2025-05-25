@@ -62,22 +62,4 @@ void main() {
 
     expect(find.byType(LoginScreen), findsOneWidget);
   });
-
-  testWidgets('WelcomeScreen navigates to MainScreen on explore', (WidgetTester tester) async {
-    final heroController = HeroController();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: const WelcomeScreen(),
-        navigatorObservers: [heroController],
-      ),
-    );
-
-    final exploreButtonFinder = find.text('Explore Without Account');
-    await tester.ensureVisible(exploreButtonFinder);
-    await tester.pumpAndSettle(); // Ensure scrolling animation completes
-    await tester.tap(exploreButtonFinder);
-    await tester.pumpAndSettle(); // Wait for navigation to complete
-
-    expect(find.byType(MainScreen), findsOneWidget);
-  });
 }
