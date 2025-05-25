@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class PlaybackScreen extends StatefulWidget {
   // TODO: Pass actual recording data to this screen
@@ -42,10 +43,14 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
   late int _totalDurationSeconds;
   late String _recordingId; // Store the ID in state
 
-  bool _isPlaying = false;
-  double _currentSliderValue = 0.0;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  PlayerState _playerState = PlayerState.stopped;
   Duration _currentPosition = Duration.zero;
+  Duration _totalDuration = Duration.zero;
+
+  bool _isPlaying = false;
   bool _didEditOccur = false; // Flag to track if an edit was made and saved
+  bool _isSeeking = false;
 
   @override
   void initState() {
@@ -57,7 +62,67 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
     _username = widget.initialUsername;
     _notes = widget.initialNotes;
     _totalDurationSeconds = widget.initialDurationSeconds;
-    _recordingId = widget.recordingId; // Initialize it
+    _totalDuration = Duration(seconds: _totalDurationSeconds);
+    _recordingId = widget.recordingId;
+
+    _audioPlayer.onPlayerStateChanged.listen((PlayerState s) {
+      if (mounted) {
+        setState(() {
+          _playerState = s;
+          _isPlaying = s == PlayerState.playing;
+        });
+        if (s == PlayerState.completed) {
+          setState(() {
+            _currentPosition = Duration.zero;
+            _isPlaying = false;
+          });
+          _audioPlayer.seek(Duration.zero);
+          _audioPlayer.pause();
+        }
+      }
+    });
+
+    _audioPlayer.onDurationChanged.listen((Duration d) {
+      if (mounted) {
+        setState(() {
+          _totalDuration = d;
+          _totalDurationSeconds = d.inSeconds;
+        });
+      }
+    });
+
+    _audioPlayer.onPositionChanged.listen((Duration p) {
+      if (mounted && !_isSeeking) {
+        setState(() {
+          _currentPosition = p;
+        });
+      }
+    });
+
+    _initAudioPlayer();
+  }
+
+  Future<void> _initAudioPlayer() async {
+    try {
+      debugPrint('Initializing audio player with URL: ${widget.audioUrl}');
+      await _audioPlayer.setSourceUrl(widget.audioUrl);
+    } catch (e) {
+      debugPrint("Error setting audio source: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading audio: ${e.toString()}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
   String _formatDuration(Duration d) {
@@ -149,8 +214,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                   children: <Widget>[
                     TextButton(
                       child: Text('Cancel', style: TextStyle(color: colorScheme.primary)),
-                      onPressed: () =>
-                          Navigator.pop(bottomSheetContext, false), // Return false on cancel
+                      onPressed: () => Navigator.pop(bottomSheetContext, false),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
@@ -211,8 +275,8 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                                   behavior: SnackBarBehavior.floating,
                                 ),
                               );
-                              Navigator.pop(
-                                  context, true); // Pop PlaybackScreen with true for deletion
+                              // Pop PlaybackScreen with true for deletion
+                              Navigator.pop(context, true);
                             }
                           } catch (e) {
                             debugPrint('Error deleting recording: $e');
@@ -246,11 +310,9 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                           'notes': notesController.text.isNotEmpty ? notesController.text : null,
                         };
 
-                        // It's good practice to ensure the widget is still mounted
                         if (!mounted) return;
 
                         try {
-                          // Show a loading indicator perhaps, or disable the button
                           debugPrint(
                               "Attempting to update Firestore document: $_recordingId with data: $updatedData");
 
@@ -268,7 +330,6 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                             _location =
                                 locationController.text.isNotEmpty ? locationController.text : null;
                             _notes = notesController.text.isNotEmpty ? notesController.text : null;
-                            // _didEditOccur is set outside this modal's pop
                           });
 
                           if (mounted && bottomSheetContext.mounted) {
@@ -279,8 +340,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
-                            Navigator.pop(
-                                bottomSheetContext, true); // Return true: changes were saved
+                            Navigator.pop(bottomSheetContext, true); // Changes were saved
                           }
                         } catch (e) {
                           debugPrint("Error updating Firestore document $_recordingId: $e");
@@ -292,8 +352,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
-                            Navigator.pop(
-                                bottomSheetContext, false); // Return false: error occurred
+                            Navigator.pop(bottomSheetContext, false); // Error occurred
                           }
                         }
                       },
@@ -308,7 +367,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
       },
     );
 
-    // If changes were saved in the modal, update the flag. Do NOT pop PlaybackScreen.
+    // If changes were saved in the modal, update the flag.
     if (changesSavedInModal == true) {
       setState(() {
         _didEditOccur = true;
@@ -316,20 +375,28 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
     }
   }
 
-  void _togglePlayPause() {
-    setState(() {
-      _isPlaying = !_isPlaying;
-      if (_isPlaying) {
-        if (_currentSliderValue == 0) {
-          _currentSliderValue = 0.1;
-          _currentPosition =
-              Duration(seconds: (_totalDurationSeconds * _currentSliderValue).toInt());
-        }
-        debugPrint('Playing...');
-      } else {
-        debugPrint('Paused...');
+  void _togglePlayPause() async {
+    if (_playerState == PlayerState.playing) {
+      await _audioPlayer.pause();
+      debugPrint('Paused audio from URL: ${widget.audioUrl}');
+    } else if (_playerState == PlayerState.paused ||
+        _playerState == PlayerState.completed ||
+        _playerState == PlayerState.stopped) {
+      if (_playerState == PlayerState.completed) {
+        await _audioPlayer.seek(Duration.zero);
       }
-    });
+      try {
+        await _audioPlayer.play(UrlSource(widget.audioUrl));
+        debugPrint('Playing audio from URL: ${widget.audioUrl}');
+      } catch (e) {
+        debugPrint("Error playing audio: $e");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error playing audio: ${e.toString()}')),
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -338,18 +405,20 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     final formattedDateTime = DateFormat('d MMMM yyyy, h:mm a').format(_dateTime);
-    final totalDuration = Duration(seconds: _totalDurationSeconds);
+
+    final double currentSliderValue = (_totalDuration.inMilliseconds > 0)
+        ? _currentPosition.inMilliseconds.toDouble() / _totalDuration.inMilliseconds.toDouble()
+        : 0.0;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
         leading: IconButton(
-          // Custom back button
           icon: Icon(Theme.of(context).platform == TargetPlatform.iOS
               ? CupertinoIcons.back
               : Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context, _didEditOccur); // Pop with the flag
+            Navigator.pop(context, _didEditOccur);
           },
         ),
         iconTheme: IconThemeData(color: colorScheme.onPrimary),
@@ -421,16 +490,37 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
             // Playback Controls Section
             const SizedBox(height: 16), // Spacing before controls
             Slider(
-              value: _currentSliderValue,
+              value: currentSliderValue.clamp(0.0, 1.0),
               min: 0.0,
               max: 1.0,
               onChanged: (value) {
-                setState(() {
-                  _currentSliderValue = value;
-                  _currentPosition = Duration(
-                    seconds: (_totalDurationSeconds * value).toInt(),
+                if (_totalDuration.inMilliseconds > 0) {
+                  final newPosition = Duration(
+                    milliseconds: (value * _totalDuration.inMilliseconds).round(),
                   );
+                  setState(() {
+                    _currentPosition = newPosition;
+                  });
+                }
+              },
+              onChangeStart: (value) {
+                setState(() {
+                  _isSeeking = true;
                 });
+              },
+              onChangeEnd: (value) async {
+                setState(() {
+                  _isSeeking = false;
+                });
+                if (_totalDuration.inMilliseconds > 0) {
+                  final newPosition = Duration(
+                    milliseconds: (value * _totalDuration.inMilliseconds).round(),
+                  );
+                  await _audioPlayer.seek(newPosition);
+                  if (_playerState == PlayerState.paused && _isPlaying) {
+                    await _audioPlayer.resume();
+                  }
+                }
               },
               activeColor: colorScheme.primary,
               inactiveColor: colorScheme.surfaceContainerHighest,
@@ -445,7 +535,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                     style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                   Text(
-                    _formatDuration(totalDuration),
+                    _formatDuration(_totalDuration),
                     style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                 ],
