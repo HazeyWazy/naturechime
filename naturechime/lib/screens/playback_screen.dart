@@ -62,13 +62,150 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
   }
 
   void _onEdit() {
-    // TODO: Implement edit functionality (e.g., show a dialog or navigate to an edit screen)
-    debugPrint('Edit button tapped. Title: $_title, Notes: $_notes');
-    // For now, let's simulate an edit
-    // setState(() {
-    //   _title = "Edited Title";
-    //   _notes = "These are some edited notes.";
-    // });
+    // Create TextEditingControllers for the fields to be edited
+    final titleController = TextEditingController(text: _title);
+    final locationController = TextEditingController(text: _location ?? '');
+    final notesController = TextEditingController(text: _notes ?? '');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Important for keyboard overlapping
+      builder: (BuildContext bottomSheetContext) {
+        final colorScheme = Theme.of(bottomSheetContext).colorScheme;
+        final textTheme = Theme.of(bottomSheetContext).textTheme;
+
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom, // Adjust for keyboard
+            left: 16.0,
+            right: 16.0,
+            top: 20.0,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Edit Recording Details',
+                  style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Title',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    filled: true,
+                    fillColor: colorScheme.surfaceContainerHighest,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: locationController,
+                  decoration: InputDecoration(
+                    labelText: 'Location (Optional)',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    filled: true,
+                    fillColor: colorScheme.surfaceContainerHighest,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: notesController,
+                  decoration: InputDecoration(
+                    labelText: 'Notes/Description (Optional)',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    alignLabelWithHint: true, // Good for multiline
+                    filled: true,
+                    fillColor: colorScheme.surfaceContainerHighest,
+                  ),
+                  maxLines: 3,
+                  textInputAction: TextInputAction.newline,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    TextButton(
+                      child: const Text('Cancel'),
+                      onPressed: () => Navigator.pop(bottomSheetContext),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.error,
+                        foregroundColor: colorScheme.onError,
+                      ),
+                      child: const Text('Delete Recording'),
+                      onPressed: () {
+                        // Close the bottom sheet first
+                        Navigator.pop(bottomSheetContext);
+                        // Show confirmation dialog for delete
+                        showDialog(
+                          context: context, // Use the main screen's context
+                          builder: (BuildContext dialogContext) {
+                            return AlertDialog(
+                              title: const Text('Delete Recording?'),
+                              content: const Text(
+                                  'Are you sure you want to delete this recording? This action cannot be undone.'),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Text('Cancel'),
+                                  onPressed: () => Navigator.pop(dialogContext),
+                                ),
+                                TextButton(
+                                  child: Text('Delete', style: TextStyle(color: colorScheme.error)),
+                                  onPressed: () {
+                                    Navigator.pop(dialogContext); // Close confirmation dialog
+                                    // TODO: Implement actual delete logic (e.g., call a service, notify parent)
+                                    debugPrint('Recording deleted: $_title');
+                                    // Pop the PlaybackScreen after deletion
+                                    if (mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                      ),
+                      child: const Text('Save Changes'),
+                      onPressed: () {
+                        setState(() {
+                          _title = titleController.text;
+                          _location =
+                              locationController.text.isNotEmpty ? locationController.text : null;
+                          _notes = notesController.text.isNotEmpty ? notesController.text : null;
+                        });
+                        Navigator.pop(bottomSheetContext); // Close the bottom sheet
+                        debugPrint(
+                            'Changes saved. Title: $_title, Location: $_location, Notes: $_notes');
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20), // Spacing at the bottom
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _togglePlayPause() {
