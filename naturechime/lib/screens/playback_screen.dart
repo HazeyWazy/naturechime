@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class PlaybackScreen extends StatefulWidget {
-  // TODO: Pass actual recording data to this screen
   final String initialTitle;
   final DateTime? initialDateTime;
   final String? initialLocation;
@@ -18,13 +17,12 @@ class PlaybackScreen extends StatefulWidget {
 
   const PlaybackScreen({
     super.key,
-    this.initialTitle = 'Forest Ambience',
+    required this.initialTitle,
     this.initialDateTime,
-    this.initialLocation = 'Amazon Rainforest',
-    this.initialUsername = 'NatureLover23',
-    this.initialNotes =
-        'A beautiful morning in the rainforest, birds chirping and leaves rustling. Captured the essence perfectly.',
-    this.initialDurationSeconds = 300, // 5 minutes
+    this.initialLocation,
+    required this.initialUsername,
+    this.initialNotes,
+    required this.initialDurationSeconds,
     this.isCurrentUserRecording = false, // Default to false
     required this.audioUrl,
     required this.recordingId, // Add this
