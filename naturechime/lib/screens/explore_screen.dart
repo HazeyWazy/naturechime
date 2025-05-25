@@ -4,56 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:naturechime/models/recording_model.dart';
 import 'package:naturechime/widgets/recording_list_item.dart';
 
-final List<Recording> _mockRecordings = [
-  Recording(
-    id: '1',
-    title: 'Morning Forest Birds',
-    location: 'Blackwood Forest',
-    username: 'NatureFan1',
-    createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 5, hours: 2))),
-    durationSeconds: 185,
-    notes: 'Clear bird songs, a bit of wind noise.',
-    userId: 'user123',
-    audioUrl: 'https://example.com/audio1.mp3',
-  ),
-  Recording(
-    id: '2',
-    title: 'Ocean Waves at Sunset',
-    location: 'Sunset Beach',
-    username: 'BeachLover',
-    createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 10, hours: 18))),
-    durationSeconds: 300,
-    notes: 'Calm waves, distant seagulls.',
-    userId: 'user456',
-    audioUrl: 'https://example.com/audio2.mp3',
-  ),
-  Recording(
-    id: '3',
-    title: 'Rain on Tent',
-    location: 'Mountain Camp',
-    username: 'HikerDude',
-    createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 2, hours: 22))),
-    durationSeconds: 600,
-    userId: 'user123',
-    notes: null, // Example of no notes
-    audioUrl: 'https://example.com/audio3.mp3',
-  ),
-  Recording(
-    id: '4',
-    title: 'City Park Ambience',
-    location: 'Central Park',
-    username: 'UrbanExplorer',
-    createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1, hours: 12))),
-    durationSeconds: 240,
-    notes: 'Distant city sounds, children playing.',
-    userId: 'user789',
-    audioUrl: 'https://example.com/audio4.mp3',
-  ),
-];
-
-// Assume current logged-in user ID
-const String currentUserId = 'user123';
-
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
 
@@ -62,13 +12,31 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
-  List<Recording> _filteredRecordings = _mockRecordings; // Use Recording model
+  // Use a Future to hold the recordings from Firestore
+  Future<List<Recording>>? _recordingsFuture;
+  List<Recording> _allRecordings = []; // To store all fetched recordings
+  List<Recording> _filteredRecordings = []; // For displaying filtered results
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    _recordingsFuture = _fetchRecordingsFromFirestore();
     _searchController.addListener(_filterRecordings);
+  }
+
+  Future<List<Recording>> _fetchRecordingsFromFirestore() async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance.collection('recordings').get();
+      _allRecordings =
+          querySnapshot.docs.map((doc) => Recording.fromFirestore(doc.data(), doc.id)).toList();
+      // Initially, filtered recordings are all recordings
+      _filteredRecordings = List.from(_allRecordings);
+      return _allRecordings;
+    } catch (e) {
+      debugPrint('Error fetching recordings: $e');
+      return []; // Return empty list on error
+    }
   }
 
   @override
@@ -81,11 +49,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
   void _filterRecordings() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      _filteredRecordings = _mockRecordings.where((recording) {
+      // Filter from _allRecordings
+      _filteredRecordings = _allRecordings.where((recording) {
         final titleMatch = recording.title.toLowerCase().contains(query);
-        // Ensure location is not null before calling toLowerCase()
         final locationMatch = recording.location?.toLowerCase().contains(query) ?? false;
-        return titleMatch || locationMatch;
+        final usernameMatch = recording.username?.toLowerCase().contains(query) ?? false;
+        return titleMatch || locationMatch || usernameMatch;
       }).toList();
     });
   }
@@ -127,34 +96,98 @@ class _ExploreScreenState extends State<ExploreScreen> {
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: _filteredRecordings.isEmpty
-                ? Center(
+            child: FutureBuilder<List<Recording>>(
+              future: _recordingsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  print('Snapshot error: ${snapshot.error}');
+                  return Center(
+                    child: Text(
+                      'Error loading recordings. Please try again later.',
+                      style: textTheme.bodyLarge?.copyWith(color: colorScheme.error),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No recordings available yet.',
+                      style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
+
+                // Use _filteredRecordings for the list view
+                if (_filteredRecordings.isEmpty && _searchController.text.isNotEmpty) {
+                  return Center(
                     child: Text(
                       'No recordings found matching your search.',
                       style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
                       textAlign: TextAlign.center,
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    itemCount: _filteredRecordings.length,
-                    itemBuilder: (context, index) {
-                      final recording = _filteredRecordings[index];
-                      return RecordingListItem(
-                        key: ValueKey(recording.id),
-                        title: recording.title,
-                        // Convert Timestamp to DateTime for the UI widget
-                        dateTime: recording.createdAt.toDate(),
-                        durationSeconds: recording.durationSeconds,
-                        location: recording.location,
-                        username: recording.username ?? 'Unknown User', // Provide a fallback
-                        notes: recording.notes,
-                        userId: recording.userId,
-                        audioUrl: recording.audioUrl,
-                        recordingId: recording.id,
-                      );
-                    },
-                  ),
+                  );
+                }
+
+                // If search is empty and _allRecordings is empty (covered by !snapshot.hasData),
+                // or if search has text but _filteredRecordings is empty.
+                // The list to display is always _filteredRecordings.
+                // If _allRecordings is not empty but _filteredRecordings becomes empty due to search,
+                // then the "No recordings found matching your search" message is shown.
+                // If _allRecordings is initially empty, "No recordings available yet" is shown.
+
+                final recordingsToShow = _searchController.text.isEmpty &&
+                        _filteredRecordings.isEmpty &&
+                        _allRecordings.isNotEmpty
+                    ? _allRecordings // Show all if search is empty and filtered is empty (implies initial load with data)
+                    : _filteredRecordings;
+
+                if (recordingsToShow.isEmpty && _searchController.text.isNotEmpty) {
+                  return Center(
+                    child: Text(
+                      'No recordings found matching your search.',
+                      style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
+
+                if (recordingsToShow.isEmpty && _allRecordings.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No recordings available yet.',
+                      style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  itemCount: recordingsToShow.length,
+                  itemBuilder: (context, index) {
+                    final recording = recordingsToShow[index];
+                    return RecordingListItem(
+                      key: ValueKey(recording.id),
+                      title: recording.title,
+                      // Convert Timestamp to DateTime for the UI widget
+                      dateTime: recording.createdAt.toDate(),
+                      durationSeconds: recording.durationSeconds,
+                      location: recording.location,
+                      username: recording.username ?? 'Unknown User', // Provide a fallback
+                      notes: recording.notes,
+                      userId: recording.userId,
+                      audioUrl: recording.audioUrl,
+                      recordingId: recording.id,
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
