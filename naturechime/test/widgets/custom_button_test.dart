@@ -21,8 +21,7 @@ void main() {
       expect(find.text(buttonText), findsOneWidget);
     });
 
-    testWidgets('executes onPressed callback when enabled',
-        (WidgetTester tester) async {
+    testWidgets('executes onPressed callback when enabled', (WidgetTester tester) async {
       int pressCount = 0;
       await tester.pumpWidget(buildTestWidget(
         CustomButton(
@@ -66,8 +65,7 @@ void main() {
       expect(side?.width, 2.0);
     });
 
-    testWidgets('updates visual properties on interaction',
-        (WidgetTester tester) async {
+    testWidgets('updates visual properties on interaction', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget(
         CustomButton(text: 'Press Me', onPressed: () {}),
       ));
@@ -82,7 +80,7 @@ void main() {
         WidgetState.pressed,
       });
       expect(overlayColor, isNotNull);
-      expect(overlayColor?.alpha, equals(26)); // 0.1020 * 255 ≈ 26
+      expect(overlayColor?.a, equals(26)); // 0.1020 * 255 ≈ 26
     });
   });
 }

@@ -14,38 +14,44 @@ void main() {
     );
   }
 
-  testWidgets('AudioLevelIndicator renders with correct number of bars', (WidgetTester tester) async {
+  testWidgets('AudioLevelIndicator renders with correct number of bars',
+      (WidgetTester tester) async {
     const barCount = 10;
     await tester.pumpWidget(buildTestWidget(0.5, barCount: barCount));
-    
+
     // Find all bar containers (excluding spacing widgets)
     final barFinder = find.byWidgetPredicate(
       (widget) => widget is Container && widget.child == null,
     );
-    
+
     expect(barFinder, findsNWidgets(barCount));
   });
 
-  testWidgets('AudioLevelIndicator shows correct active bars based on audio level', (WidgetTester tester) async {
+  testWidgets('AudioLevelIndicator shows correct active bars based on audio level',
+      (WidgetTester tester) async {
     const barCount = 10;
     const audioLevel = 0.5; // 50% level should activate half the bars
     await tester.pumpWidget(buildTestWidget(audioLevel, barCount: barCount));
 
-    final containers = tester.widgetList<Container>(find.byType(Container)).where(
-      (container) => container.child == null, // Only get the bar containers
-    ).toList();
+    final containers = tester
+        .widgetList<Container>(find.byType(Container))
+        .where(
+          (container) => container.child == null, // Only get the bar containers
+        )
+        .toList();
 
     // Check if approximately half the bars are active (have non-transparent color)
     int activeBarCount = containers.where((container) {
       final decoration = container.decoration as BoxDecoration;
       final color = decoration.color!;
-      return color.alpha == 255; // Fully opaque colors are active bars
+      return color.a == 255; // Fully opaque colors are active bars
     }).length;
 
     expect(activeBarCount, (barCount * audioLevel).round());
   });
 
-  testWidgets('AudioLevelIndicator handles invalid audio levels gracefully', (WidgetTester tester) async {
+  testWidgets('AudioLevelIndicator handles invalid audio levels gracefully',
+      (WidgetTester tester) async {
     // Test with audio level > 1.0
     await tester.pumpWidget(buildTestWidget(1.5));
     expect(find.byType(AudioLevelIndicator), findsOneWidget);
@@ -55,13 +61,17 @@ void main() {
     expect(find.byType(AudioLevelIndicator), findsOneWidget);
   });
 
-  testWidgets('AudioLevelIndicator shows different colors based on audio level', (WidgetTester tester) async {
+  testWidgets('AudioLevelIndicator shows different colors based on audio level',
+      (WidgetTester tester) async {
     // Test high audio level (should show red bars)
     await tester.pumpWidget(buildTestWidget(0.9));
-    
-    final containers = tester.widgetList<Container>(find.byType(Container)).where(
-      (container) => container.child == null,
-    ).toList();
+
+    final containers = tester
+        .widgetList<Container>(find.byType(Container))
+        .where(
+          (container) => container.child == null,
+        )
+        .toList();
 
     bool hasRedBar = containers.any((container) {
       final decoration = container.decoration as BoxDecoration;
