@@ -14,7 +14,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Placeholder data for recordings using Recording model
 
   List<Recording> _recordings = [];
   bool _isLoading = true;
