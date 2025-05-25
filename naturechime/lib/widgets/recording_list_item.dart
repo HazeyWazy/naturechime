@@ -2,8 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:naturechime/screens/playback_screen.dart';
-
-const String currentUserId = 'user123';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RecordingListItem extends StatelessWidget {
   final String title;
@@ -36,6 +35,9 @@ class RecordingListItem extends StatelessWidget {
   }
 
   void _navigateToPlayback(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final bool isOwner = currentUser != null && currentUser.uid == userId;
+
     Navigator.push(
       context,
       CupertinoModalPopupRoute(
@@ -46,7 +48,7 @@ class RecordingListItem extends StatelessWidget {
           initialUsername: username,
           initialNotes: notes,
           initialDurationSeconds: durationSeconds,
-          isCurrentUserRecording: userId == currentUserId,
+          isCurrentUserRecording: isOwner,
           audioUrl: audioUrl,
         ),
       ),
