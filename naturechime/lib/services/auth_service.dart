@@ -12,6 +12,9 @@ class AuthService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // Getter for the current user
+  User? get currentUser => _auth.currentUser;
+
   // Cloudinary credentials will be loaded from .env
   late final String? _cloudinaryCloudName;
   late final String? _cloudinaryUnsignedUploadPreset;
