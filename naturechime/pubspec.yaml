@@ -52,6 +52,7 @@ dependencies:
   audioplayers: ^6.4.0
   firebase_auth_mocks: ^0.14.1
   firebase_core_platform_interface: ^5.4.0
+  fake_cloud_firestore: ^3.1.0
 
 dev_dependencies:
   flutter_test:

@@ -5,7 +5,8 @@ import 'package:naturechime/models/recording_model.dart';
 import 'package:naturechime/widgets/recording_list_item.dart';
 
 class ExploreScreen extends StatefulWidget {
-  const ExploreScreen({super.key});
+  final FirebaseFirestore? firestore;
+  const ExploreScreen({super.key, this.firestore});
 
   @override
   State<ExploreScreen> createState() => _ExploreScreenState();
@@ -32,7 +33,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Stream<List<Recording>> _getRecordingsStream() {
-    return FirebaseFirestore.instance
+    final firestoreInstance = widget.firestore ?? FirebaseFirestore.instance;
+    return firestoreInstance
         .collection('recordings')
         .orderBy('createdAt', descending: true) // Show newest first
         .snapshots()
