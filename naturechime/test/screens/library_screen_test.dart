@@ -43,7 +43,7 @@ class MockRecordingListItem extends StatelessWidget {
 
 void main() {
   setUpAll(() async {
-    await setupFirebaseAuthMocksAndGetApp();
+    await setupFirebaseAuthMocks();
   });
 
   // ignore: unused_local_variable
@@ -52,7 +52,6 @@ void main() {
   late MockFirebaseAuth mockAuth;
 
   setUp(() {
-    // mockAuth = MockFirebaseAuth(); // Removed as it's assigned in the test & this value wasn't used
     fakeFirestore = FakeFirebaseFirestore();
   });
 

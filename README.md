@@ -38,22 +38,23 @@ lib/
 ├── models/                  # Data models and state management
 │   ├── recording_model.dart # Sound recording data structure
 │   └── user_model.dart      # User profile and settings
-├── screens/                 # UI screens and navigation
-│   ├── auth/               # Authentication-related screens
-│   ├── main/              # Core application screens
-│   └── shared/            # Common screen components
+screens/
+│   └──  welcome_screen.dart      # Landing page with auth options
+│   └── create_account_screen.dart # New user registration
+│   └──  login_screen.dart       # User authentication
+│   └── main_screen.dart        # Main navigation container
+│   └── home_screen.dart        # Dashboard view
+│   └── library_screen.dart     # Recordings collection
+│   └── explore_screen.dart     # Discover other recordings
+│   └── record_screen.dart      # Audio recording interface
+│   └── profile_screen.dart     # User profile management
+│   └── playback_screen.dart    # Audio playback interface
 ├── services/               # Business logic and external services
 │   ├── auth_service.dart   # Authentication handling
-│   ├── storage_service.dart # File and media storage
-│   └── recording_service.dart # Audio recording operations
 ├── utils/                  # Utility functions and helpers
 │   ├── theme.dart          # Application theming
 │   ├── validators.dart     # Input validation
-│   └── constants.dart      # Global constants
 └── widgets/               # Reusable UI components
-    ├── buttons/           # Custom button implementations
-    ├── forms/             # Form-related widgets
-    └── cards/            # Card-based display components
 ```
 
 ### Architecture Pattern
@@ -93,15 +94,23 @@ The application follows a layered architecture pattern:
 - **WelcomeScreen**: Initial landing page with app features and authentication options
 - **LoginScreen**: Email/password and Google sign-in functionality
 - **CreateAccountScreen**: New user registration with profile picture upload
+  - **Difference from Design:** Added a note under the username field stating _"You cannot change it later."_
 
 #### Main Application Screens
 
 - **MainScreen**: Container for the main navigation tabs
+
+  - **Difference from Design:** The AppBar originally designed to include a profile picture icon on the right side has been omitted in the final implementation.
+
 - **HomeScreen**: Dashboard with quick access to recent recordings
 - **LibraryScreen**: Personal collection of recorded sounds
 - **ExploreScreen**: Discover and browse other users' recordings
 - **RecordScreen**: Audio recording interface
 - **ProfileScreen**: User profile management and settings
+  - **Difference from Design:**
+    - The _Edit Profile_ button was replaced with an **Edit Profile Picture** button.
+    - The _Favourites_ functionality was removed from this screen.
+    - Account management buttons (such as _Log out_, _Delete account_, etc.) are centered on the screen rather than left-aligned as originally planned.
 
 ### Services
 
@@ -268,15 +277,16 @@ The application uses Cloudinary for storing recorded audio files. You need to pr
 - In the root directory of the project (alongside `pubspec.yaml`), create a new file named exactly `.env`.
 - You will need to populate the `.env` file with the following Cloudinary credentials:
 
-    *   `CLOUDINARY_CLOUD_NAME=`
-    *   `CLOUDINARY_UPLOAD_PRESET=`
+  - `CLOUDINARY_CLOUD_NAME=`
+  - `CLOUDINARY_UPLOAD_PRESET=`
 
 **Please use the following values provided for marking purposes:**
+
 ```
 CLOUDINARY_CLOUD_NAME=dogct8rpj
 CLOUDINARY_UPLOAD_PRESET=NCRecordings
 CLOUDINARY_PROFILE_UPLOAD_PRESET=NCProfilePics
-```   
+```
 
 **4. Install Dependencies:**
 Open your terminal in the project root and run:

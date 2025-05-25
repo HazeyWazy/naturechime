@@ -7,7 +7,7 @@ import 'package:naturechime/screens/welcome_screen.dart';
 import 'package:naturechime/services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
-import 'firebase_auth_mocks.dart' as firebase_mocks; // Import the new mock setup
+import 'firebase_auth_mocks.dart' as firebase_mocks;
 
 // Mock AuthService
 class MockAuthService extends Mock implements AuthService {}
@@ -15,7 +15,7 @@ class MockAuthService extends Mock implements AuthService {}
 void main() {
   setUpAll(() async {
     // Use the new mock setup for Firebase
-    await firebase_mocks.setupFirebaseAuthMocksAndGetApp();
+    await firebase_mocks.setupFirebaseAuthMocks();
   });
 
   late MockAuthService mockAuthService;
