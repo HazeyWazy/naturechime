@@ -284,132 +284,143 @@ class _ProfileScreenState extends State<ProfileScreen> {
             );
           }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Profile',
-                  style: textTheme.headlineSmall?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
+          return Scaffold(
+            backgroundColor: colorScheme.surface,
+            body: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 20,
                 ),
-                const SizedBox(height: 20),
-                Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 500),
                   child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: colorScheme.surfaceContainerHighest,
-                        backgroundImage: _userModel?.profileImageUrl != null &&
-                                _userModel!.profileImageUrl!.isNotEmpty
-                            ? NetworkImage(_userModel!.profileImageUrl!)
-                            : null,
-                        child: _userModel?.profileImageUrl == null ||
-                                _userModel!.profileImageUrl!.isEmpty
-                            ? Icon(
-                                CupertinoIcons.person_fill,
-                                size: 65,
-                                color: colorScheme.onSurface.withAlpha(75),
-                              )
-                            : null,
-                      ),
-                      const SizedBox(height: 10),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
                       Text(
-                        _userModel?.displayName ?? 'Username',
-                        style: textTheme.titleLarge?.copyWith(
+                        'Profile',
+                        style: textTheme.headlineSmall?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: Column(
+                          children: [
+                            CircleAvatar(
+                              radius: 50,
+                              backgroundColor: colorScheme.surfaceContainerHighest,
+                              backgroundImage: _userModel?.profileImageUrl != null &&
+                                      _userModel!.profileImageUrl!.isNotEmpty
+                                  ? NetworkImage(_userModel!.profileImageUrl!)
+                                  : null,
+                              child: _userModel?.profileImageUrl == null ||
+                                      _userModel!.profileImageUrl!.isEmpty
+                                  ? Icon(
+                                      CupertinoIcons.person_fill,
+                                      size: 65,
+                                      color: colorScheme.onSurface.withAlpha(75),
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              _userModel?.displayName ?? 'Username',
+                              style: textTheme.titleLarge?.copyWith(
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            ElevatedButton.icon(
+                              icon: _isUpdatingPicture
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2, color: Colors.white))
+                                  : const Icon(CupertinoIcons.pencil),
+                              label: const Text('Edit Profile Picture'),
+                              onPressed: _isUpdatingPicture ? null : _pickAndUpdateProfilePicture,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colorScheme.secondary,
+                                foregroundColor: colorScheme.onSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      Text(
+                        'Profile Details',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
                           color: colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        icon: _isUpdatingPicture
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : const Icon(CupertinoIcons.pencil),
-                        label: const Text('Edit Profile Picture'),
-                        onPressed: _isUpdatingPicture ? null : _pickAndUpdateProfilePicture,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.secondary,
-                          foregroundColor: colorScheme.onSecondary,
+                      ListTile(
+                        leading: Icon(
+                          CupertinoIcons.mail_solid,
+                          color: colorScheme.onSurface,
+                        ),
+                        title: Text(
+                          _userModel?.email ?? 'email@example.com',
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      Text(
+                        'Account Management',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(CupertinoIcons.square_arrow_left),
+                          label: const Text('Logout'),
+                          onPressed: () async {
+                            await authService.signOut();
+                            if (context.mounted) {
+                              Navigator.of(context).pushReplacement(
+                                CupertinoPageRoute(
+                                  builder: (context) => const WelcomeScreen(),
+                                ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colorScheme.surfaceContainerHighest,
+                            foregroundColor: colorScheme.onSurfaceVariant,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(CupertinoIcons.trash_fill),
+                          label: const Text('Delete Account'),
+                          onPressed: _isDeletingAccount ? null : _confirmDeleteAccount,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colorScheme.error,
+                            foregroundColor: colorScheme.onError,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
-                Text(
-                  'Profile Details',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                ListTile(
-                  leading: Icon(
-                    CupertinoIcons.mail_solid,
-                    color: colorScheme.onSurface,
-                  ),
-                  title: Text(
-                    _userModel?.email ?? 'email@example.com',
-                    style: TextStyle(
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Text(
-                  'Account Management',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(CupertinoIcons.square_arrow_left),
-                    label: const Text('Logout'),
-                    onPressed: () async {
-                      await authService.signOut();
-                      if (context.mounted) {
-                        Navigator.of(context).pushReplacement(
-                          CupertinoPageRoute(
-                            builder: (context) => const WelcomeScreen(),
-                          ),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.surfaceContainerHighest,
-                      foregroundColor: colorScheme.onSurfaceVariant,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(CupertinoIcons.trash_fill),
-                    label: const Text('Delete Account'),
-                    onPressed: _isDeletingAccount ? null : _confirmDeleteAccount,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.error,
-                      foregroundColor: colorScheme.onError,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           );
         },
