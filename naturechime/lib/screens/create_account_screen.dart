@@ -171,10 +171,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'This will be visible to other users.',
+                            'This will be visible to other users. You cannot change it later.',
                             style: TextStyle(
                               fontSize: 12,
-                              color: colorScheme.onSurface.withValues(alpha: 0.75),
+                              color: colorScheme.onSurface.withValues(alpha: 0.9),
                             ),
                           ),
 
