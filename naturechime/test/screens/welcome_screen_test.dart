@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:naturechime/screens/create_account_screen.dart';
 import 'package:naturechime/screens/login_screen.dart';
-import 'package:naturechime/screens/main_screen.dart';
 import 'package:naturechime/screens/welcome_screen.dart';
 import 'package:naturechime/widgets/custom_button.dart';
 
