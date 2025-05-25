@@ -155,6 +155,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                   userId: recording.userId,
                                   notes: recording.notes,
                                   audioUrl: recording.audioUrl,
+                                  recordingId: recording.id,
+                                  onRefreshNeeded: _fetchUserRecordings,
                                 );
                               },
                             ),

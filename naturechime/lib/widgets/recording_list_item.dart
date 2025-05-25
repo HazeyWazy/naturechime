@@ -13,6 +13,8 @@ class RecordingListItem extends StatelessWidget {
   final String? notes;
   final String userId;
   final String audioUrl;
+  final VoidCallback? onRefreshNeeded;
+  final String recordingId;
 
   const RecordingListItem({
     super.key,
@@ -24,6 +26,8 @@ class RecordingListItem extends StatelessWidget {
     this.notes,
     required this.userId,
     required this.audioUrl,
+    this.onRefreshNeeded,
+    required this.recordingId,
   });
 
   String _formatDuration(int totalSeconds) {
@@ -34,13 +38,13 @@ class RecordingListItem extends StatelessWidget {
     return "$minutes:$seconds"; // Format as MM:SS
   }
 
-  void _navigateToPlayback(BuildContext context) {
+  Future<void> _navigateToPlayback(BuildContext context) async {
     final currentUser = FirebaseAuth.instance.currentUser;
     final bool isOwner = currentUser != null && currentUser.uid == userId;
 
-    Navigator.push(
+    final result = await Navigator.push(
       context,
-      CupertinoModalPopupRoute(
+      CupertinoModalPopupRoute<bool>(
         builder: (context) => PlaybackScreen(
           initialTitle: title,
           initialDateTime: dateTime,
@@ -50,9 +54,14 @@ class RecordingListItem extends StatelessWidget {
           initialDurationSeconds: durationSeconds,
           isCurrentUserRecording: isOwner,
           audioUrl: audioUrl,
+          recordingId: recordingId,
         ),
       ),
     );
+
+    if (result == true) {
+      onRefreshNeeded?.call();
+    }
   }
 
   @override

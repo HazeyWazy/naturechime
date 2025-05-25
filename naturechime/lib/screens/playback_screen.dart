@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PlaybackScreen extends StatefulWidget {
   // TODO: Pass actual recording data to this screen
@@ -12,6 +13,7 @@ class PlaybackScreen extends StatefulWidget {
   final int initialDurationSeconds;
   final bool isCurrentUserRecording;
   final String audioUrl;
+  final String recordingId; // Firestore document ID
 
   const PlaybackScreen({
     super.key,
@@ -24,6 +26,7 @@ class PlaybackScreen extends StatefulWidget {
     this.initialDurationSeconds = 300, // 5 minutes
     this.isCurrentUserRecording = false, // Default to false
     required this.audioUrl,
+    required this.recordingId, // Add this
   });
 
   @override
@@ -37,10 +40,12 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
   late String _username;
   late String? _notes;
   late int _totalDurationSeconds;
+  late String _recordingId; // Store the ID in state
 
   bool _isPlaying = false;
   double _currentSliderValue = 0.0;
   Duration _currentPosition = Duration.zero;
+  bool _didEditOccur = false; // Flag to track if an edit was made and saved
 
   @override
   void initState() {
@@ -52,6 +57,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
     _username = widget.initialUsername;
     _notes = widget.initialNotes;
     _totalDurationSeconds = widget.initialDurationSeconds;
+    _recordingId = widget.recordingId; // Initialize it
   }
 
   String _formatDuration(Duration d) {
@@ -61,22 +67,21 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
     return '$minutes:$seconds';
   }
 
-  void _onEdit() {
-    // Create TextEditingControllers for the fields to be edited
+  void _onEdit() async {
     final titleController = TextEditingController(text: _title);
     final locationController = TextEditingController(text: _location ?? '');
     final notesController = TextEditingController(text: _notes ?? '');
 
-    showModalBottomSheet(
+    final bool? changesSavedInModal = await showModalBottomSheet<bool>(
       context: context,
-      isScrollControlled: true, // Important for keyboard overlapping
+      isScrollControlled: true,
       builder: (BuildContext bottomSheetContext) {
         final colorScheme = Theme.of(bottomSheetContext).colorScheme;
         final textTheme = Theme.of(bottomSheetContext).textTheme;
 
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom, // Adjust for keyboard
+            bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom,
             left: 16.0,
             right: 16.0,
             top: 20.0,
@@ -88,43 +93,52 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
               children: <Widget>[
                 Text(
                   'Edit Recording Details',
-                  style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 TextField(
                   controller: titleController,
+                  style: TextStyle(color: colorScheme.onSurface),
                   decoration: InputDecoration(
                     labelText: 'Title',
+                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     filled: true,
-                    fillColor: colorScheme.surfaceContainerHighest,
+                    fillColor: colorScheme.surfaceContainer,
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: locationController,
+                  style: TextStyle(color: colorScheme.onSurface),
                   decoration: InputDecoration(
                     labelText: 'Location (Optional)',
+                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     filled: true,
-                    fillColor: colorScheme.surfaceContainerHighest,
+                    fillColor: colorScheme.surfaceContainer,
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: notesController,
+                  style: TextStyle(color: colorScheme.onSurface),
                   decoration: InputDecoration(
                     labelText: 'Notes/Description (Optional)',
+                    labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
-                    alignLabelWithHint: true, // Good for multiline
+                    alignLabelWithHint: true,
                     filled: true,
-                    fillColor: colorScheme.surfaceContainerHighest,
+                    fillColor: colorScheme.surfaceContainer,
                   ),
                   maxLines: 3,
                   textInputAction: TextInputAction.newline,
@@ -134,8 +148,9 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
                     TextButton(
-                      child: const Text('Cancel'),
-                      onPressed: () => Navigator.pop(bottomSheetContext),
+                      child: Text('Cancel', style: TextStyle(color: colorScheme.primary)),
+                      onPressed: () =>
+                          Navigator.pop(bottomSheetContext, false), // Return false on cancel
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
@@ -144,38 +159,74 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                         foregroundColor: colorScheme.onError,
                       ),
                       child: const Text('Delete Recording'),
-                      onPressed: () {
-                        // Close the bottom sheet first
-                        Navigator.pop(bottomSheetContext);
+                      onPressed: () async {
+                        Navigator.pop(bottomSheetContext); // Close modal first
                         // Show confirmation dialog for delete
-                        showDialog(
-                          context: context, // Use the main screen's context
+                        final bool? deleteConfirmed = await showDialog<bool>(
+                          context: context,
                           builder: (BuildContext dialogContext) {
                             return AlertDialog(
-                              title: const Text('Delete Recording?'),
-                              content: const Text(
-                                  'Are you sure you want to delete this recording? This action cannot be undone.'),
+                              title: Text(
+                                'Delete Recording?',
+                                style: TextStyle(color: colorScheme.onSurface),
+                              ),
+                              content: Text(
+                                'Are you sure you want to delete this recording? This action cannot be undone.',
+                                style: TextStyle(color: colorScheme.onSurfaceVariant),
+                              ),
                               actions: <Widget>[
                                 TextButton(
-                                  child: const Text('Cancel'),
-                                  onPressed: () => Navigator.pop(dialogContext),
+                                  child:
+                                      Text('Cancel', style: TextStyle(color: colorScheme.primary)),
+                                  onPressed: () => Navigator.pop(dialogContext, false),
                                 ),
                                 TextButton(
-                                  child: Text('Delete', style: TextStyle(color: colorScheme.error)),
-                                  onPressed: () {
-                                    Navigator.pop(dialogContext); // Close confirmation dialog
-                                    // TODO: Implement actual delete logic (e.g., call a service, notify parent)
-                                    debugPrint('Recording deleted: $_title');
-                                    // Pop the PlaybackScreen after deletion
-                                    if (mounted) {
-                                      Navigator.pop(context);
-                                    }
-                                  },
+                                  child: Text(
+                                    'Delete',
+                                    style: TextStyle(color: colorScheme.error),
+                                  ),
+                                  onPressed: () => Navigator.pop(dialogContext, true),
                                 ),
                               ],
                             );
                           },
                         );
+
+                        if (deleteConfirmed == true && mounted) {
+                          try {
+                            debugPrint('Attempting to delete Firestore document: $_recordingId');
+                            await FirebaseFirestore.instance
+                                .collection('recordings')
+                                .doc(_recordingId)
+                                .delete();
+                            debugPrint('Firestore document $_recordingId deleted.');
+                            debugPrint(
+                                'Recording "$_title" deleted (Firestore & simulated storage).');
+
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Recording "$_title" deleted successfully.'),
+                                  backgroundColor: colorScheme.primary,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              Navigator.pop(
+                                  context, true); // Pop PlaybackScreen with true for deletion
+                            }
+                          } catch (e) {
+                            debugPrint('Error deleting recording: $e');
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Failed to delete recording: $e'),
+                                  backgroundColor: Theme.of(context).colorScheme.error,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          }
+                        }
                       },
                     ),
                     const SizedBox(width: 8),
@@ -185,27 +236,84 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
                         foregroundColor: colorScheme.onPrimary,
                       ),
                       child: const Text('Save Changes'),
-                      onPressed: () {
-                        setState(() {
-                          _title = titleController.text;
-                          _location =
-                              locationController.text.isNotEmpty ? locationController.text : null;
-                          _notes = notesController.text.isNotEmpty ? notesController.text : null;
-                        });
-                        Navigator.pop(bottomSheetContext); // Close the bottom sheet
-                        debugPrint(
-                            'Changes saved. Title: $_title, Location: $_location, Notes: $_notes');
+                      onPressed: () async {
+                        // Make async for Firestore call
+                        // Prepare data for Firestore update
+                        final updatedData = {
+                          'title': titleController.text,
+                          'location':
+                              locationController.text.isNotEmpty ? locationController.text : null,
+                          'notes': notesController.text.isNotEmpty ? notesController.text : null,
+                        };
+
+                        // It's good practice to ensure the widget is still mounted
+                        if (!mounted) return;
+
+                        try {
+                          // Show a loading indicator perhaps, or disable the button
+                          debugPrint(
+                              "Attempting to update Firestore document: $_recordingId with data: $updatedData");
+
+                          // Update Firestore
+                          await FirebaseFirestore.instance
+                              .collection('recordings')
+                              .doc(_recordingId)
+                              .update(updatedData);
+
+                          debugPrint("Firestore document $_recordingId updated successfully.");
+
+                          // Update local state only AFTER successful Firestore update
+                          setState(() {
+                            _title = titleController.text;
+                            _location =
+                                locationController.text.isNotEmpty ? locationController.text : null;
+                            _notes = notesController.text.isNotEmpty ? notesController.text : null;
+                            // _didEditOccur is set outside this modal's pop
+                          });
+
+                          if (mounted && bottomSheetContext.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Changes saved successfully!'),
+                                backgroundColor: colorScheme.primary,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            Navigator.pop(
+                                bottomSheetContext, true); // Return true: changes were saved
+                          }
+                        } catch (e) {
+                          debugPrint("Error updating Firestore document $_recordingId: $e");
+                          if (mounted && bottomSheetContext.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Error saving changes: $e'),
+                                backgroundColor: Theme.of(context).colorScheme.error,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            Navigator.pop(
+                                bottomSheetContext, false); // Return false: error occurred
+                          }
+                        }
                       },
                     ),
                   ],
                 ),
-                const SizedBox(height: 20), // Spacing at the bottom
+                const SizedBox(height: 20),
               ],
             ),
           ),
         );
       },
     );
+
+    // If changes were saved in the modal, update the flag. Do NOT pop PlaybackScreen.
+    if (changesSavedInModal == true) {
+      setState(() {
+        _didEditOccur = true;
+      });
+    }
   }
 
   void _togglePlayPause() {
@@ -235,6 +343,15 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
+        leading: IconButton(
+          // Custom back button
+          icon: Icon(Theme.of(context).platform == TargetPlatform.iOS
+              ? CupertinoIcons.back
+              : Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, _didEditOccur); // Pop with the flag
+          },
+        ),
         iconTheme: IconThemeData(color: colorScheme.onPrimary),
         title: Text(
           'Recording Playback',

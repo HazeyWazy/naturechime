@@ -192,6 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       userId: recording.userId,
                       notes: recording.notes,
                       audioUrl: recording.audioUrl,
+                      recordingId: recording.id,
                     );
                   },
                 ),

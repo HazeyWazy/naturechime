@@ -34,7 +34,7 @@ final List<Recording> _mockRecordings = [
     username: 'HikerDude',
     createdAt: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 2, hours: 22))),
     durationSeconds: 600,
-    userId: 'user123', // This recording belongs to 'user123'
+    userId: 'user123',
     notes: null, // Example of no notes
     audioUrl: 'https://example.com/audio3.mp3',
   ),
@@ -151,6 +151,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         notes: recording.notes,
                         userId: recording.userId,
                         audioUrl: recording.audioUrl,
+                        recordingId: recording.id,
                       );
                     },
                   ),
