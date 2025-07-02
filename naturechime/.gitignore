@@ -49,3 +49,4 @@ app.*.map.json
 
 # Environment variables for Firebase
 firebase_options.dart
+google-services.json
