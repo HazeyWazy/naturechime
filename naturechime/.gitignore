@@ -46,3 +46,6 @@ app.*.map.json
 
 # Environment variables for Cloudinary
 .env
+
+# Environment variables for Firebase
+firebase_options.dart

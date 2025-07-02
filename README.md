@@ -266,7 +266,7 @@ To run this project, you will need to perform a one-time setup for API credentia
 **2. Clone the Repository:**
 
 ```bash
-git clone https://github.com/MQ-COMP3130/mobile-application-development-HazeyWazy.git
+git clone https://github.com/HazeyWazy/naturechime.git
 cd naturechime
 ```
 
@@ -279,14 +279,6 @@ The application uses Cloudinary for storing recorded audio files. You need to pr
 
   - `CLOUDINARY_CLOUD_NAME=`
   - `CLOUDINARY_UPLOAD_PRESET=`
-
-**Please use the following values provided for marking purposes:**
-
-```
-CLOUDINARY_CLOUD_NAME=dogct8rpj
-CLOUDINARY_UPLOAD_PRESET=NCRecordings
-CLOUDINARY_PROFILE_UPLOAD_PRESET=NCProfilePics
-```
 
 **4. Install Dependencies:**
 Open your terminal in the project root and run:
