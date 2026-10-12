@@ -279,6 +279,7 @@ The application uses Cloudinary for storing recorded audio files. You need to pr
 
   - `CLOUDINARY_CLOUD_NAME=`
   - `CLOUDINARY_UPLOAD_PRESET=`
+  - `CLOUDINARY_PROFILE_UPLOAD_PRESET=`
 
 **4. Install Dependencies:**
 Open your terminal in the project root and run:
