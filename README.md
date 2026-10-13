@@ -10,7 +10,6 @@ Unlike traditional audio recording apps that focus on voice memos or music creat
 
 - [Overview](#overview)
 - [Features](#features)
-- [User Analysis](#user-analysis)
 - [App Design](#app-design)
 - [MVP Scope](#mvp-scope)
 - [Project Architecture](#project-architecture)
