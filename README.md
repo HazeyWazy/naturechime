@@ -157,15 +157,15 @@ Each screen shows the original wireframe (left) next to the final implementation
 
 #### Welcome Screen
 
-<img src="DESIGN/Screenshots/welcome.jpg" alt="Welcome Screen" width="250">
+<img src="DESIGN/Screenshots/welcome.jpg" alt="Welcome Screen" width="250"> &nbsp;&nbsp;&nbsp; <img src="DESIGN/Screenshots/welcome_dark.jpg" alt="Welcome Screen Dark Mode" width="250">
 
 #### Login Screen
 
-<img src="DESIGN/Screenshots/login.jpg" alt="Login Screen" width="250">
+<img src="DESIGN/Screenshots/login.jpg" alt="Login Screen" width="250"> &nbsp;&nbsp;&nbsp; <img src="DESIGN/Screenshots/login_dark.jpg" alt="Login Screen Dark Mode" width="250">
 
 #### Create Account Screen
 
-<img src="DESIGN/Screenshots/create_account.jpg" alt="Create Account Screen" width="250">
+<img src="DESIGN/Screenshots/create_account.jpg" alt="Create Account Screen" width="250"> &nbsp;&nbsp;&nbsp; <img src="DESIGN/Screenshots/create_account_dark.jpg" alt="Create Account Screen Dark Mode" width="250">
 
 #### Authentication Flow
 
@@ -189,7 +189,7 @@ From the welcome screen, users can either:
 
 #### Home Screen
 
-<img src="DESIGN/Screenshots/home.jpg" alt="Home Screen" width="250">
+<img src="DESIGN/Screenshots/home.jpg" alt="Home Screen" width="250"> &nbsp;&nbsp;&nbsp; <img src="DESIGN/Screenshots/home_dark.jpg" alt="Home Screen Dark Mode" width="250">
 
 The Home screen features recently recorded sounds and quick-access recording control.
 
@@ -211,7 +211,7 @@ The dashboard connects to all primary functions:
 
 #### Library Screen
 
-<img src="DESIGN/Screenshots/library.jpg" alt="Library Screen" width="250">
+<img src="DESIGN/Screenshots/library.jpg" alt="Library Screen" width="250"> &nbsp;&nbsp;&nbsp; <img src="DESIGN/Screenshots/library_dark.jpg" alt="Library Screen Dark Mode" width="250">
 
 The Library screen provides a list view to browse personal recordings and a search button to look for a specific recording.
 
@@ -232,7 +232,7 @@ The Library screen provides a list view to browse personal recordings and a sear
 
 #### Explore Screen
 
-<img src="DESIGN/Screenshots/explore.jpg" alt="Explore Screen" width="250">
+<img src="DESIGN/Screenshots/explore.jpg" alt="Explore Screen" width="250"> &nbsp;&nbsp;&nbsp; <img src="DESIGN/Screenshots/explore_dark.jpg" alt="Explore Screen Dark Mode" width="250">
 
 The Explore screen features a search bar and a list view for browsing recordings from other users, listening to them, and marking them as favorites.
 
@@ -251,7 +251,7 @@ The Explore screen features a search bar and a list view for browsing recordings
 
 #### Record Screen
 
-<img src="DESIGN/Screenshots/record.jpg" alt="Record Screen" width="250">
+<img src="DESIGN/Screenshots/record.jpg" alt="Record Screen" width="250"> &nbsp;&nbsp;&nbsp; <img src="DESIGN/Screenshots/record_dark.jpg" alt="Record Screen Dark Mode" width="250">
 
 The Record screen focuses on essential functionality: starting, stopping, discarding and saving recordings.
 
@@ -273,7 +273,7 @@ The Record screen focuses on essential functionality: starting, stopping, discar
 
 #### Profile Screen
 
-<img src="DESIGN/Screenshots/profile.jpg" alt="Profile Screen" width="250">
+<img src="DESIGN/Screenshots/profile.jpg" alt="Profile Screen" width="250"> &nbsp;&nbsp;&nbsp; <img src="DESIGN/Screenshots/profile_dark.jpg" alt="Profile Screen Dark Mode" width="250">
 
 The Profile screen includes a profile picture, username, edit profile button, favourite recordings, and account management options.
 
@@ -299,7 +299,7 @@ The Profile screen includes a profile picture, username, edit profile button, fa
 
 #### Playback Screen
 
-<img src="DESIGN/Screenshots/playback.jpg" alt="Playback Screen" width="250">
+<img src="DESIGN/Screenshots/playback.jpg" alt="Playback Screen" width="250"> &nbsp;&nbsp;&nbsp; <img src="DESIGN/Screenshots/playback_dark.jpg" alt="Playback Screen Dark Mode" width="250">
 
 The Playback Screen allows users to navigate through the recording.
 
