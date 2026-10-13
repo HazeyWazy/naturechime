@@ -36,13 +36,6 @@ NatureChime aims to create a community of sound enthusiasts who can:
 - Sound designers and audio professionals
 - General users interested in natural sounds
 
-### Key Differentiators
-
-- High-quality audio recording with custom parameters
-- Location tagging for each recording
-- Comprehensive sound organisation system
-- Cross-platform compatibility (iOS and Android)
-
 ## Features
 
 ### Core Functionality
@@ -80,52 +73,6 @@ NatureChime aims to create a community of sound enthusiasts who can:
 - Home screen showing recent recordings
 - Bottom navigation between Home, Record, Library, Explore, and Profile
 - Loading and error handling
-
-### Additional / Stretch Features
-
-- **Advanced audio:** adjustable quality settings, waveform visualisation, audio trimming, noise reduction
-- **Organisation:** tagging, categories, search and filtering by title, location, and date
-- **User experience:** dark mode, favourites, offline recording with later sync, export and sharing
-- **Community:** public/private recordings, likes and comments, following other users, featured collections
-
-## User Analysis
-
-### Target User Groups
-
-**Nature Enthusiasts and Outdoor Adventurers** document authentic natural soundscapes during outdoor activities, preserving memories and building collections from different environments, seasons, and locations.
-
-**Urban Explorers and City Dwellers** are fascinated by the sounds of urban environments, from subway stations to historic buildings, and enjoy documenting the acoustic character of different neighbourhoods.
-
-**Mindfulness Practitioners and Sound Therapy Users** collect calming sounds, such as gentle rainfall or distant wind chimes, for meditation, relaxation, or sound therapy.
-
-### Potential User Groups
-
-**Content Creators and Educators** (podcasters, filmmakers, teachers) value high-quality recordings and detailed metadata for reuse in creative and educational projects.
-
-**Acoustic Ecology Enthusiasts and Researchers** document changing soundscapes for cultural preservation, environmental awareness, or scientific work.
-
-### User Personas
-
-**Emma, 34 - The Nature Enthusiast**
-- *Background:* Wildlife biologist and amateur photographer
-- *Motivation:* Documenting biodiversity through sound
-- *Behaviours:* Regular hiking trips to national parks; interested in bird calls and seasonal variations in forest sounds
-- *Usage:* Records weekly, meticulously tags and categorises findings, occasionally shares discoveries
-- *Pain points:* Existing apps lack proper organisation systems for nature sounds
-
-**Marcus, 27 - The Urban Sound Explorer**
-- *Background:* Architecture student and podcast listener
-- *Motivation:* Capturing the voice of different urban spaces
-- *Behaviours:* Explores neighbourhoods on weekends; fascinated by how sound reflects cultural and structural aspects of cities
-- *Usage:* Records spontaneously while commuting, uses location features heavily, shares favourites with friends
-- *Pain points:* Wants better ways to organise city sounds; existing apps focus too much on music or voice memos
-
-**Sophia, 42 - The Mindfulness Practitioner**
-- *Background:* Yoga instructor and wellness blogger
-- *Motivation:* Collecting calming sounds for classes and personal practice
-- *Behaviours:* Seeks out peaceful environments, records longer ambient soundscapes
-- *Usage:* Selective recording, focused on playback quality, less interested in social features
-- *Pain points:* Other apps pick up too much ambient noise; wants clean recordings for professional use
 
 ### Competitive Advantage
 
@@ -331,15 +278,6 @@ The Playback Screen allows users to navigate through the recording.
 - **Library management:** list of all user recordings, simple search by title, audio storage and retrieval
 - **Playback:** play/pause, progress bar with seeking, recording information, edit/delete for own recordings
 - **Basic UI:** clean navigation, responsive layouts, consistent styling, essential loading and error states
-
-### Stretch Goals
-
-- Dark mode toggle
-- Filtering by date and predefined categories
-- Waveform visualisation, advanced audio settings, audio trimming, noise reduction
-- Public/private toggle, following users, comments and likes, featured collections
-- Custom tags and advanced multi-parameter search
-- Export/sharing and offline mode with synchronisation
 
 ### Development Prioritisation
 
